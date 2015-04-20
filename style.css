@@ -1,0 +1,260 @@
+#xf-logo {
+	background-image: url(images/openloci_logo2.png);
+	background-color: black;
+	width: 175px;
+	height: 80px;
+}
+
+.logo {
+	border-top: 5px solid white;
+	border-left: 5px solid white;
+	vertical-align: text-bottom;
+	text-align: right;
+	background-image: url(images/openloci_logo2.png);
+	width: 400px;
+	height: 80px;
+}
+
+.portalErrorMessage,
+.system-message,  /* These two last ones are reST error indicators */
+#error-handling {
+    background-color: #ffa07b;
+    border: 1px solid #ff0000;
+    color: Black;
+    font-size: 85%;
+    font-weight: bold;
+    margin: 1em 0em 0em 0em;
+    margin-right: 2em;
+    padding: 0.5em 1em 0.5em 3em;
+    vertical-align: middle;
+    background-image: url(xataface/images/delete.gif);
+    background-repeat: no-repeat;
+    background-position: 5px 50%;
+
+}
+
+ul
+{
+    list-style: none;
+}
+
+#selected-actions {
+	display: none;
+}
+
+/*Change the spacing of the navigation pane*/
+.portletContent {
+    padding: .1em;
+}
+/*Change the navigation pane size*/
+.portletBody #portlet-navigation-tree{
+	height: 50em;
+	width: 12em;
+}
+
+/*Change the size of the lookup widget*/
+.xf-RecordBrowserWidget-displayField { width: 300px}
+/*#people-firstname-wrapper .xf-RecordBrowserWidget-displayField { width: 400px}*/
+
+
+/*Add a notice class to the widget description (formHelp) class to make things stand out if desired*/
+.formHelp_notice {
+	color: #ffaaaa;
+}
+
+.formHelp:hover .formHelp_notice {
+	color: #ff0000;
+}
+
+
+/* Set nowrap for all table lists */
+.listing {
+	white-space:nowrap;
+}
+
+/* Stop Xataface from auto-lowercasing all tabs/actions */
+.contentViews li a { text-transform: none; }
+.contentActions { text-transform: none; }
+
+/*Make the X in lookup popup windows visible ... sorta... not sure why this is broken*/
+.ui-icon-closethick { background-color: blue;}
+
+
+/*Temp fix until can figure out how to modify the actual content*/
+.dataface-view-description {
+	display: none;
+}
+
+/*Temp fix until can figure out how to modify the actual content*/
+.Dataface_GlanceList-oneLineDescription-posted-by {
+	display: none;
+}
+
+/*Sets the attributes in the list view*/
+.unmarked_link {
+	font-style: normal;
+}
+
+/*Stop bolding dates*/
+.date  {
+	font-weight: normal;
+	font-size: 90%;
+}
+
+.datetime {
+	font-weight: normal;
+	font-size: 90%;
+}
+
+/*
+.dataface-view-status {
+	display: none;
+}
+*/
+
+.rate_codes {
+/*	float: left;
+	border: 1px solid black;
+	*/
+}
+
+.rate_codes th {
+	text-align: left;
+/*
+	border: 1px solid black;
+    background: transparent;
+    border-top: 0px solid #8cacbb;
+    border-bottom: 0px solid #8cacbb;
+    border-right: 0px solid #8cacbb;
+    font-weight: normal;
+    padding: 0em 1em 0em 1em;
+*/
+}
+
+/*
+.Dataface_collapsible_sidebar {
+	color: #cc9900;
+	padding-left: 0;
+	width: 80%;
+}
+*/
+
+.view_add  {
+	border-collapse:collapse;
+	/*border: 0px solid black;*/
+	white-space: nowrap;
+}
+.view_add  td  {
+	border: 1px solid black;
+	padding-right: 5px;
+	padding-left: 5px;
+}
+.view_add  th  {
+	border-right: 0px solid black;
+	padding-right: 5px;
+	padding-left: 5px;
+	text-align: left;
+}
+
+.view_add_totals {
+	border-collapse:collapse;
+	border: 0px dashed black;
+	white-space: nowrap;
+}
+.view_add_totals  td  {
+	border-bottom: 1px solid black;
+	padding-right: 5px;
+	padding-left: 5px;
+}
+.view_add_totals  th  {
+	border-left: 1px solid black;
+	border-bottom: 1px solid black;
+	padding-right: 5px;
+	padding-left: 5px;
+	text-align: left;
+}
+
+.view_contacts  {
+	text-align: left;
+	border-collapse:collapse;
+}
+.view_contacts  td  {
+	padding-right: 10px;
+}
+.view_contacts  th  {
+	border-bottom: 1px solid black;
+}
+
+.journal_post_sub_tab{
+	width: 100%;
+	border-collapse:collapse;
+	border: 0px solid black;
+}
+.journal_post_sub_tab th{
+	background-color: transparent;
+	border: 0px solid black;
+	border-bottom: 1px solid black;
+	border-right: 1px solid black;
+}
+.journal_post_sub_tab td{
+	/*width: 100%;*/
+	background-color: transparent;
+	border: 0px solid black;
+	border-right: 1px solid black;
+}
+.journal_post_sub_tab_upper {
+	border-top: 1px solid black;
+}
+
+.invoice_tab  {
+	border-collapse:collapse;
+	width: 7in;
+	border: 0px solid black;
+}
+
+.invoice_tab  td  {
+	border: 0px solid black;
+}
+
+.invoice_tab  th  {
+	border-bottom: 1px solid black;
+	text-align: left;
+}
+
+.invoice_div  {
+	width: 7in;
+	text-align: right;
+}
+
+.invoice_select {
+	border-collapse:collapse;
+	border: 1px solid black;
+}
+
+.invoice_select td{
+	border-right: 1px solid black;
+	border-bottom: 1px solid black;
+	padding: 2px;
+}
+
+.invoice_select th{
+	border-right: 1px solid black;
+	border-bottom: 1px solid black;
+	padding: 2px;
+}
+
+
+/*Hide the "My Profile" and "Control Panel" links*/
+#personal_tools_my_profile-link {display: none;}
+#personal_tools_manage-link {display: none;}
+
+/*Hides certain fields that we only want to pop up on a selection*/
+/*#custom_rph_form_row {display: none;}*/
+
+
+/*For printing documents*/
+.print {display: none;}
+.invoice {
+	font-size: 14px;
+}
+

@@ -1,0 +1,55 @@
+{use_macro file="Dataface_Main_Template.html"}
+	{fill_slot name="main_column"}
+
+		<link rel="stylesheet" type="text/css" media="all" href="{$ENV.DATAFACE_URL}/lib/jscalendar/calendar-win2k-2.css">
+		<script type="text/javascript" src="{$ENV.DATAFACE_URL}/lib/jscalendar/calendar.js"></script>
+		<script type="text/javascript" src="{$ENV.DATAFACE_URL}/lib/jscalendar/lang/calendar-en.js"></script>
+		<script type="text/javascript" src="{$ENV.DATAFACE_URL}/lib/jscalendar/calendar-setup.js"></script>
+
+		<h1>Generate Payroll</h1>
+		<br>
+		<br>***Dev Note:
+		<br>1. <del>This needs to check the payroll period and suggest date accordingly (instead of previous week).</del>
+		<br>2. If possible, have only proper dates selectable - unsure if this can be done with this particular calendar widget. Maybe find one that can.
+		<br>3. Insure that for non-weekly periods, can't accidentally select an off week.
+		<br>4. Semimonthly & monthly payroll periods are not implemented yet.
+		<br>5. Currently assigns overtime for hourly employees based on hours per payroll period. For weekly pay, this isn't an issue, but for others need to calculate hours / week > 40.
+		<br>***
+		<br><br>
+
+		<form name="select_date" id="select_date">
+			<input type="hidden" name="-action" value="generate_payroll">
+	
+			Select Payroll Period
+			<input df:cloneable="1" name="selected_date" id="f-calendar-field-1" type="text" value={$default_date} readonly="readonly">
+			<a df:cloneable="1" href="#" id="f-calendar-trigger-1">
+				<img align="middle" border="0" src="{$ENV.DATAFACE_URL}/lib/jscalendar/img.gif" alt="">
+			</a>
+
+			{literal}
+			<script type="text/javascript">
+				Calendar.setup({
+					"inputField":"f-calendar-field-1",
+					"button":"f-calendar-trigger-1",
+					"ifFormat":"%Y-%m-%d",
+					"daFormat":"%Y/%m/%d",
+					"firstDay":0,
+					"showsTime":false,
+					"showOthers":true,
+					"timeFormat":12,
+					"weekNumbers":true
+				});
+			</script>
+			{/literal}			
+
+			<br>
+			<span class="formHelp" style="text-indent: 16em;">*Default is <b>last</b> week</span>
+			
+			<br><br>
+			
+			<input type="submit" id="submit" value="Submit">
+			
+		</form>
+
+	{/fill_slot}
+{/use_macro}
