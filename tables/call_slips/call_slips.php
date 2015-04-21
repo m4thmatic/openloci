@@ -671,6 +671,8 @@ class tables_call_slips {
 	//Function to create a billing entry based on the call slip - returns the id of the billing record
 	//On error: (-1) Error with creating AR entry, (-2) Error saving the customer balance, (-3) Error loading customer record.
 	function create_billing($record){
+		//Check AR permissions....
+		//.....
 		
 		if($record->val('type') == "TM"){
 		
@@ -815,26 +817,39 @@ class tables_call_slips {
 
 	//Function to unbill a call slip - returns 1 on success, -1 on error.
 	function unbill_cs($record){
+		//Check AR permissions....
+		$AR_userperms = get_userPerms('accounts_receivable');
+		if($AR_userperms != "edit" && $AR_userperms != "post")
+			return -1;
+	
 		$ar_record = df_get_record('accounts_receivable',array('voucher_id'=>$record->val('ar_billing_id')));
+
+		//Check to insure the records exists
+		if($ar_record == null)
+			return -5; //Record is null
 		
-		//Check for batch
+		//Check for batch - if so, remove the entry from the batch
 		if($ar_record->val('batch_id') != null){
 			//Delete record in accounts_receivable_batch_vouchers
 			$ar_batch_record = df_get_record('accounts_receivable_batch_vouchers',array('voucher_id'=>$record->val('ar_billing_id')));
 			$res = $ar_batch_record->delete(true);
 		}
 		if ( PEAR::isError($res) ){
-			// An error occurred
-			return -1;
+			return -2; //Error deleting the AR Batch Entry
 		}
-			
-		$res = $ar_record->delete(true);
+		
+		//Delete the AR entry
+		//--Normally, we would use ->delete(true), which checks permissions, but b/c AR entries have delete disallowed, we have to do it w/o a permission check.
+		//--So, just in case, something awkward happens, check to make sure the AR entry isn't Pending / Posted before deleting.
+		if($ar_record->val('post_status') == null){
+			$res = $ar_record->delete(); //Delete w/o permission check.
 
-		if ( PEAR::isError($res) ){
-			// An error occurred
-			return -2;
+			if ( PEAR::isError($res) ){
+				return -3; //Error deleting the AR Record
+			}
 		}
-
+		else
+			return -4; //Post Status is not null
 		
 		return 1;
 	}

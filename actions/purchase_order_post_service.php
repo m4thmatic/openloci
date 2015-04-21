@@ -24,9 +24,9 @@ class actions_purchase_order_post_service {
 		$query =& $app->getQuery();
 		$query['-skip'] = 0;
 		$query['-limit'] = ""; //******I think this will do *all*, but need to double check********
-		$query['post_status'] = 'Pending';
+		$query['post_status'] = 'Received';
 			
-		//Pull all records with Pending status
+		//Pull all records with Received status
 		$records = df_get_records_array($poTable, $query);
 
 		//Unset the 'post_status' query
@@ -143,7 +143,7 @@ class actions_purchase_order_post_service {
 
 			}
 		}
-			
+		
 		//Display the page
 		df_display(array("headers"=>$headers,"confirm"=>$confirm,"po_type"=>$po_type), 'purchase_order_post.html');
 
