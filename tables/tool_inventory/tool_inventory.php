@@ -60,9 +60,15 @@ class tables_tool_inventory {
 		if($quantity[1] != 0)
 			$quantity[1] = '.'.$quantity[1];
 		else
-			$quantity[1] = '';
-			
-		return $quantity[0] . $quantity[1];
+			$quantity[1] = '0';
+		
+		$location_records = $record->getRelatedRecords('tool_locations');
+		$location_quantity = 0;
+		foreach ($location_records as $location_record){
+			$location_quantity += $location_record['quantity'];
+		}
+		
+		return $quantity[0] . $quantity[1] . " (" . $location_quantity . " assigned)";
 	}
 	
 	function beforeSave(&$record){

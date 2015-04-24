@@ -99,8 +99,13 @@ class tables_inventory {
 		else
 			$quantity[1] = '';
 			
-		return $quantity[0] . $quantity[1];
-	}
+		$location_records = $record->getRelatedRecords('inventory_locations');
+		$location_quantity = 0;
+		foreach ($location_records as $location_record){
+			$location_quantity += $location_record['quantity'];
+		}
+		
+		return $quantity[0] . $quantity[1] . " (" . $location_quantity . " assigned)";	}
 	
 	function beforeSave(&$record){
 		//Calculate and Save Average
