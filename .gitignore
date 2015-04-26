@@ -1,0 +1,12 @@
+modules
+templates_c
+htmlreports
+pdfreports
+calendar
+ckeditor
+datepicker
+depselect
+g2
+/conf.db.ini
+/dump_sql_schema.bat
+/db/db_backup*.sql
