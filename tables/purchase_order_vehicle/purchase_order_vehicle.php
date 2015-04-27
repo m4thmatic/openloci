@@ -175,6 +175,19 @@ class tables_purchase_order_vehicle {
 		return 1;
 	}
 
+	function new_mileage__validate(&$record, $value, &$params){
+		//Empty the error message
+		$params['message'] = '';
+		
+		if($record->val("new_mileage") < $record->val("old_mileage")){
+			$params['message'] .= $msg.'New Vehicle Mileage is less than the Old Mileage.';
+			return false;
+		}
+
+		//If no errors have occured, move along.
+		return 1;
+	}
+	
 	function section__status(&$record){
 		$app =& Dataface_Application::getInstance(); 
 		$query =& $app->getQuery();
@@ -190,12 +203,20 @@ class tables_purchase_order_vehicle {
 
 			//Check for errors.
 			if ( PEAR::isError($res) ){
-				// An error occurred
-				//throw new Exception($res->getMessage());
 				$msg = '<input type="hidden" name="--error" value="Unable to change status. This is most likely because you do not have the required permissions.">';
 			}
 			else
 				$msg = '<input type="hidden" name="--msg" value="Status Changed to: Received">';
+			
+			if($record->val("vehicle_id") != null){
+				$vehicle_record = df_get_record("vehicles",array("vehicle_id"=>$record->val("vehicle_id")));
+				$vehicle_record->setValue("mileage", $record->val("new_mileage"));
+				$res = $vehicle_record->save(null, true); //Save Record w/ permission check.
+				
+				//Check for errors.
+				if ( PEAR::isError($res) )
+					$msg = '<input type="hidden" name="--error" value="Notice: Could not update the vehicle record with the current mileage. This is most likely because you do not have the required permissions.">';
+			}
 			
 			$childString .= '<form name="status_change">';
 			$childString .= '<input type="hidden" name="-table" value="'.$query['-table'].'">';

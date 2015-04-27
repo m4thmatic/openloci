@@ -180,7 +180,7 @@ CREATE TABLE `_record_versioning__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`record_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=96 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=97 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1541,6 +1541,8 @@ CREATE TABLE `purchase_order_vehicle` (
   `shipping` decimal(11,2) DEFAULT NULL,
   `total` decimal(11,2) DEFAULT NULL,
   `assigned_voucher_id` int(11) DEFAULT NULL,
+  `old_mileage` decimal(7,0) DEFAULT NULL,
+  `new_mileage` decimal(7,0) DEFAULT NULL,
   PRIMARY KEY (`purchase_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1742,6 +1744,7 @@ CREATE TABLE `vehicles` (
   `assigned_employee_id` int(10) DEFAULT NULL,
   `license_plate_number` varchar(10) DEFAULT NULL,
   `license_plate_type` varchar(20) DEFAULT NULL,
+  `mileage` decimal(7,0) DEFAULT NULL,
   `make` varchar(50) DEFAULT NULL,
   `model` varchar(50) DEFAULT NULL,
   `year` date DEFAULT NULL,
@@ -1781,6 +1784,64 @@ CREATE TABLE `vehicles` (
   `use_as_location` varchar(5) DEFAULT NULL,
   PRIMARY KEY (`vehicle_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vehicles__history` (
+  `history__id` int(11) NOT NULL AUTO_INCREMENT,
+  `history__language` varchar(2) DEFAULT NULL,
+  `history__comments` text,
+  `history__user` varchar(32) DEFAULT NULL,
+  `history__state` int(5) DEFAULT '0',
+  `history__modified` datetime DEFAULT NULL,
+  `vehicle_id` int(10) DEFAULT NULL,
+  `vehicle_number` varchar(100) DEFAULT NULL,
+  `assigned_employee_id` int(10) DEFAULT NULL,
+  `date_purchased` date DEFAULT NULL,
+  `lease_number` varchar(50) DEFAULT NULL,
+  `purchase_vendor_id` int(10) DEFAULT NULL,
+  `purchase_date` date DEFAULT NULL,
+  `purchase_po` int(10) DEFAULT NULL,
+  `purchase_price` decimal(12,2) DEFAULT NULL,
+  `lease_vendor_id` int(10) DEFAULT NULL,
+  `lease_date` date DEFAULT NULL,
+  `lease_price` decimal(12,2) DEFAULT NULL,
+  `lease_buy_back` decimal(12,2) DEFAULT NULL,
+  `lease_deposit` date DEFAULT NULL,
+  `lease_payment_frequency` varchar(20) DEFAULT NULL,
+  `lease_payment_amount` decimal(12,2) DEFAULT NULL,
+  `insurance_vendor_id` int(10) DEFAULT NULL,
+  `insurance_issued_to` varchar(100) DEFAULT NULL,
+  `insurance_price` decimal(12,2) DEFAULT NULL,
+  `insurance_type` varchar(50) DEFAULT NULL,
+  `insurance_payment_frequency` varchar(20) DEFAULT NULL,
+  `insurance_payment_amount` decimal(12,2) DEFAULT NULL,
+  `use_as_location` varchar(5) DEFAULT NULL,
+  `vin_number` varchar(20) DEFAULT NULL,
+  `license_plate_number` varchar(10) DEFAULT NULL,
+  `license_plate_type` varchar(20) DEFAULT NULL,
+  `ownership_status` varchar(10) DEFAULT NULL,
+  `mileage` int(7) DEFAULT NULL,
+  `make` varchar(50) DEFAULT NULL,
+  `model` varchar(50) DEFAULT NULL,
+  `year` date DEFAULT NULL,
+  `color` varchar(50) DEFAULT NULL,
+  `body_type` varchar(50) DEFAULT NULL,
+  `weight` decimal(10,2) DEFAULT NULL,
+  `engine_size` varchar(50) DEFAULT NULL,
+  `engine_cycles` varchar(50) DEFAULT NULL,
+  `transmission_type` varchar(50) DEFAULT NULL,
+  `tire_size` varchar(50) DEFAULT NULL,
+  `battery_type` varchar(50) DEFAULT NULL,
+  `alarm_type` varchar(50) DEFAULT NULL,
+  `date_registration_due` date DEFAULT NULL,
+  `registration_fee` decimal(10,2) DEFAULT NULL,
+  `date_inspection_due` date DEFAULT NULL,
+  `date_taxes_due` date DEFAULT NULL,
+  PRIMARY KEY (`history__id`),
+  KEY `prikeys` (`vehicle_id`) USING HASH,
+  KEY `datekeys` (`history__modified`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
