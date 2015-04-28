@@ -199,6 +199,7 @@ function getNavItem($key, $label){
 		//echo '<script src="navigate_away.js" type="text/javascript" language="javascript"></script>';
 		Dataface_JavascriptTool::getInstance()->import('navigate_away.js');
 		Dataface_JavascriptTool::getInstance()->import('submithandler.js');
+		Dataface_JavascriptTool::getInstance()->import('ajax_widget_modify.js');
 	}
 	
 	//*** -- This block seems to have stopped working, moved to custom stylesheets...
