@@ -179,7 +179,10 @@ class tables_purchase_order_vehicle {
 		//Empty the error message
 		$params['message'] = '';
 		
-		if($record->val("new_mileage") < $record->val("old_mileage")){
+		//$params['message'] .= $record->val("old_mileage");
+		//return false;
+		
+		if($value < $record->val("old_mileage")){
 			$params['message'] .= $msg.'New Vehicle Mileage is less than the Old Mileage.';
 			return false;
 		}
