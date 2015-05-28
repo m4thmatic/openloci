@@ -25,7 +25,25 @@ class tables_vehicles {
 			'remove related record' => 0,
 			'delete related record' => 0			
 		);
-	}		
+	}
+	
+	
+	function block__before_record_actions(){
+		$app =& Dataface_Application::getInstance(); 
+		$record =& $app->getRecord();
+
+		if(get_userPerms('vehicles') == "edit")
+			echo '	<div class="dataface-view-record-actions">
+						<ul>
+							<li id="transfer_inventory" class="plain">
+								<a class="" id="transfer_inventory-link" href="'.$app->url('-action=vehicle_transfer&from_id='.$record->val("vehicle_id")).'">
+									<img id="transfer_inventory-icon" src="images/inventory_icon.png" alt="Transfer Inventory">
+									<span class="action-label">Transfer Inventory / Tools</span>
+								</a>
+							</li>
+						</ul>
+					</div>';
+	}
 }
 
 ?>

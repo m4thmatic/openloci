@@ -180,7 +180,7 @@ CREATE TABLE `_record_versioning__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`record_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=97 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=105 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1544,7 +1544,36 @@ CREATE TABLE `purchase_order_vehicle` (
   `old_mileage` decimal(7,0) DEFAULT NULL,
   `new_mileage` decimal(7,0) DEFAULT NULL,
   PRIMARY KEY (`purchase_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `purchase_order_vehicle__history` (
+  `history__id` int(11) NOT NULL AUTO_INCREMENT,
+  `history__language` varchar(2) DEFAULT NULL,
+  `history__comments` text,
+  `history__user` varchar(32) DEFAULT NULL,
+  `history__state` int(5) DEFAULT '0',
+  `history__modified` datetime DEFAULT NULL,
+  `purchase_id` int(11) DEFAULT NULL,
+  `purchase_order_id` varchar(12) DEFAULT NULL,
+  `vehicle_id` int(10) DEFAULT NULL,
+  `purchase_date` date DEFAULT NULL,
+  `vendor_id` int(11) DEFAULT NULL,
+  `old_mileage` decimal(7,0) DEFAULT NULL,
+  `new_mileage` decimal(7,0) DEFAULT NULL,
+  `post_status` varchar(20) DEFAULT NULL,
+  `post_date` date DEFAULT NULL,
+  `received_date` date DEFAULT NULL,
+  `item_total` decimal(11,2) DEFAULT NULL,
+  `tax` decimal(6,5) DEFAULT NULL,
+  `shipping` decimal(11,2) DEFAULT NULL,
+  `total` decimal(11,2) DEFAULT NULL,
+  `assigned_voucher_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`history__id`),
+  KEY `prikeys` (`purchase_id`) USING HASH,
+  KEY `datekeys` (`history__modified`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1552,7 +1581,23 @@ CREATE TABLE `purchase_order_vehicle_category` (
   `category_id` int(10) NOT NULL AUTO_INCREMENT,
   `category_name` varchar(200) NOT NULL,
   PRIMARY KEY (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `purchase_order_vehicle_category__history` (
+  `history__id` int(11) NOT NULL AUTO_INCREMENT,
+  `history__language` varchar(2) DEFAULT NULL,
+  `history__comments` text,
+  `history__user` varchar(32) DEFAULT NULL,
+  `history__state` int(5) DEFAULT '0',
+  `history__modified` datetime DEFAULT NULL,
+  `category_id` int(10) DEFAULT NULL,
+  `category_name` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`history__id`),
+  KEY `prikeys` (`category_id`) USING HASH,
+  KEY `datekeys` (`history__modified`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1566,7 +1611,7 @@ CREATE TABLE `purchase_order_vehicle_items` (
   `quantity_received` decimal(15,4) DEFAULT NULL,
   `purchase_price` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`list_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1695,7 +1740,25 @@ CREATE TABLE `vehicle_inventory` (
   `inventory_id` int(10) NOT NULL,
   `quantity` decimal(12,2) NOT NULL,
   PRIMARY KEY (`entry_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vehicle_inventory__history` (
+  `history__id` int(11) NOT NULL AUTO_INCREMENT,
+  `history__language` varchar(2) DEFAULT NULL,
+  `history__comments` text,
+  `history__user` varchar(32) DEFAULT NULL,
+  `history__state` int(5) DEFAULT '0',
+  `history__modified` datetime DEFAULT NULL,
+  `entry_id` int(10) DEFAULT NULL,
+  `vehicle_id` int(10) DEFAULT NULL,
+  `inventory_id` int(10) DEFAULT NULL,
+  `quantity` decimal(12,2) DEFAULT NULL,
+  PRIMARY KEY (`history__id`),
+  KEY `prikeys` (`entry_id`) USING HASH,
+  KEY `datekeys` (`history__modified`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1734,6 +1797,40 @@ CREATE TABLE `vehicle_tools__history` (
   KEY `prikeys` (`entry_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vehicle_transfer` (
+  `transfer_id` int(10) NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `transfer_from` int(10) NOT NULL,
+  `transfer_to` int(10) NOT NULL,
+  PRIMARY KEY (`transfer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vehicle_transfer_inventory` (
+  `inventory_transfer_id` int(10) NOT NULL AUTO_INCREMENT,
+  `transfer_id` int(10) NOT NULL,
+  `transfer_from` int(10) NOT NULL,
+  `transfer_to` varchar(10) NOT NULL,
+  `inventory_id` int(10) NOT NULL,
+  `quantity` decimal(15,4) DEFAULT NULL,
+  PRIMARY KEY (`inventory_transfer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vehicle_transfer_tools` (
+  `tool_transfer_id` int(10) NOT NULL AUTO_INCREMENT,
+  `transfer_id` int(10) NOT NULL,
+  `transfer_from` int(10) NOT NULL,
+  `transfer_to` varchar(10) NOT NULL,
+  `tool_id` int(10) NOT NULL,
+  `quantity` decimal(15,4) DEFAULT NULL,
+  PRIMARY KEY (`tool_transfer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1841,7 +1938,7 @@ CREATE TABLE `vehicles__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`vehicle_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
