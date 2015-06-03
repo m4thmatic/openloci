@@ -29,72 +29,16 @@
 			<p class="portalErrorMessage">You do not have sufficient permissions to transfer vehicle inventory. If you believe this is in error, please see your system administrator. <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
 		
 		{elseif $status == "transferred"}
-			<p class="portalMessage">The following inventory and tools have been transferred from {$veh_from} to {$veh_to} <br> <a>View Transfer Record</a> <br> <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
-			<table class="listing resultList">
-				<tr>
-					<th>Inventory ID</th>
-					<th>Name</th>
-					<th>Quantity</th>
-				</tr>
-				{$i = 0}
-				{foreach from=$inventory item=list}
-					{if $i%2 == 0}
-						<tr class="listing odd">
-					{else}
-						<tr class="listing even">
-					{/if}
-							<td valign="top">{$list.id}</a></td>
-							<td valign="top">{$list.name}</a></td>
-							<td valign="top">{$list.quantity}</td>
-					</tr>
-					{assign var="i" value=$i+1}
-				{/foreach}
-				
-				<tr><td colspan=3>&nbsp;</td></tr>
-				
-				<tr>
-					<th>Tool ID</th>
-					<th>Name</th>
-					<th>Quantity</th>
-				</tr>
-				{assign var="i" value=0}
-				{foreach from=$tools item=list}
-					{if $i%2 == 0}
-						<tr class="listing odd">
-					{else}
-						<tr class="listing even">
-					{/if}
-							<td valign="top">{$list.id}</a></td>
-							<td valign="top">{$list.name}</a></td>
-							<td valign="top">{$list.quantity}</td>
-					</tr>
-					{assign var="i" value=$i+1}
-				{/foreach}
-
-			</table>		
-			
-		{elseif $status == "transfer"}
-			{if $from_id == NULL | $to_id == NULL}
-				<p class="portalErrorMessage">Vehicle not selected. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
-			{/if}
-			
-			<p>Transfer from <b>{$from_n}</b> to <b>{$to_n}</b></p>
-			
-			<!--form name="select_post" onSubmit='confirm_submit("select_post","confirm_post")'-->
-			<form name="select_inventory">
-				<input type="hidden" name="-action" value="vehicle_transfer">
-				<input type="hidden" name="status" value="transferred">
-				<input type="hidden" name="from_id" value="{$from_id}">
-				<input type="hidden" name="to_id" value="{$to_id}">
-							
-				<p>Inventory</p>
+			{if $inventory == NULL && $tools == NULL}
+				<p class="portalErrorMessage">No inventory selected for transfer. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
+			{else}
+		
+				<p class="portalMessage">The following inventory and tools have been transferred from {$veh_from} to {$veh_to} <br> <a href="index.php?-table=vehicle_transfer">View Transfer Record</a> <br> <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
 				<table class="listing resultList">
 					<tr>
-						<th><input type="checkbox" checked onchange=toggle_all("inventory[]",this.checked)></th>
 						<th>Inventory ID</th>
 						<th>Name</th>
 						<th>Quantity</th>
-						<th>(Total in Vehicle)</th>
 					</tr>
 					{$i = 0}
 					{foreach from=$inventory item=list}
@@ -103,26 +47,19 @@
 						{else}
 							<tr class="listing even">
 						{/if}
-							<td><input type="checkbox" checked name="inventory[]" value="{$list.id}"></td>
-							<td valign="top">{$list.id}</a></td>
-							<td valign="top">{$list.name}</a></td>
-							<td valign="top"><input name="inv_quantity[{$list.id}]" value="{$list.quantity}"></td>
-							<td valign="top" style="text-align:right">{$list.quantity}</td>
+								<td valign="top">{$list.id}</a></td>
+								<td valign="top">{$list.name}</a></td>
+								<td valign="top">{$list.quantity}</td>
 						</tr>
 						{assign var="i" value=$i+1}
 					{/foreach}
-				</table>
-				
-				<br>
-				
-				<p>Tools</p>
-				<table class="listing resultList">
+					
+					<tr><td colspan=3>&nbsp;</td></tr>
+					
 					<tr>
-						<th><input type="checkbox" checked onchange=toggle_all("tool[]",this.checked)></th>
 						<th>Tool ID</th>
 						<th>Name</th>
 						<th>Quantity</th>
-						<th>(Total in Vehicle)</th>
 					</tr>
 					{assign var="i" value=0}
 					{foreach from=$tools item=list}
@@ -131,21 +68,98 @@
 						{else}
 							<tr class="listing even">
 						{/if}
-							<td><input type="checkbox" checked name="tool[]" value="{$list.id}"></td>
-							<td valign="top">{$list.id}</a></td>
-							<td valign="top">{$list.name}</a></td>
-							<td valign="top"><input name="tool_quantity[{$list.id}]" value="{$list.quantity}"></td>
-							<td valign="top" style="text-align:right">{$list.quantity}</td>
+								<td valign="top">{$list.id}</a></td>
+								<td valign="top">{$list.name}</a></td>
+								<td valign="top">{$list.quantity}</td>
 						</tr>
 						{assign var="i" value=$i+1}
 					{/foreach}
-				</table>
 
-				<br>
+				</table>		
+			{/if}
+		{elseif $status == "transfer"}
+			{if $from_id == NULL | $to_id == NULL}
+				<p class="portalErrorMessage">Vehicle not selected. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
+			{/if}
+			
+			<p>Transfer from <b>{$from_n}</b> to <b>{$to_n}</b></p>
 
-				<input type="submit" value="Transfer">
-			</form>
+			{if $error}
+				<p class="portalErrorMessage">Inventory selection error. <a href="index.php?-action=vehicle_transfer&status=transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
+			{else}
+				<!--form name="select_post" onSubmit='confirm_submit("select_post","confirm_post")'-->
+				<form name="select_inventory">
+					<input type="hidden" name="-action" value="vehicle_transfer">
+					<input type="hidden" name="status" value="transferred">
+					<input type="hidden" name="from_id" value="{$from_id}">
+					<input type="hidden" name="to_id" value="{$to_id}">
+					
+					{if $inventory != NULL}
+						<p>Inventory</p>
+						<table class="listing resultList">
+							<tr>
+								<th><input type="checkbox" onchange=toggle_all("inventory[]",this.checked)></th>
+								<th>Inventory ID</th>
+								<th>Name</th>
+								<th>Quantity</th>
+								<th>(Total in Vehicle)</th>
+							</tr>
+							{$i = 0}
+							{foreach from=$inventory item=list}
+								{if $i%2 == 0}
+									<tr class="listing odd">
+								{else}
+									<tr class="listing even">
+								{/if}
+									<td><input type="checkbox" name="inventory[]" value="{$list.id}"></td>
+									<td valign="top">{$list.id}</a></td>
+									<td valign="top">{$list.name}</a></td>
+									<td valign="top"><input name="inv_quantity[{$list.id}]" value="{$list.quantity}"></td>
+									<td valign="top" style="text-align:right">{$list.quantity}</td>
+								</tr>
+								{assign var="i" value=$i+1}
+							{/foreach}
+						</table>
+						
+						<br>
+					{/if}
+					{if $tools != NULL}
+					<p>Tools</p>
+					<table class="listing resultList">
+						<tr>
+							<th><input type="checkbox" onchange=toggle_all("tool[]",this.checked)></th>
+							<th>Tool ID</th>
+							<th>Name</th>
+							<th>Quantity</th>
+							<th>(Total in Vehicle)</th>
+						</tr>
+						{assign var="i" value=0}
+						{foreach from=$tools item=list}
+							{if $i%2 == 0}
+								<tr class="listing odd">
+							{else}
+								<tr class="listing even">
+							{/if}
+								<td><input type="checkbox" name="tool[]" value="{$list.id}"></td>
+								<td valign="top">{$list.id}</a></td>
+								<td valign="top">{$list.name}</a></td>
+								<td valign="top"><input name="tool_quantity[{$list.id}]" value="{$list.quantity}"></td>
+								<td valign="top" style="text-align:right">{$list.quantity}</td>
+							</tr>
+							{assign var="i" value=$i+1}
+						{/foreach}
+					</table>
 
+					<br>
+					{/if}
+					
+					{if $inventory == NULL && $tools == NULL}
+						<p class="portalErrorMessage">Vehicle {$from_n} contains no inventory or tools. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Please select another vehicle.</a></p>
+					{else}
+						<input type="submit" value="Transfer">
+					{/if}
+				</form>
+			{/if}
 		{else}
 			{if $error == "selection_invalid"}
 				<p class="portalErrorMessage">One of more of the vehicles that you have selected is not valid.</p>
