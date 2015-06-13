@@ -60,7 +60,7 @@ class tables_tool_inventory {
 		if($quantity[1] != 0)
 			$quantity[1] = '.'.$quantity[1];
 		else
-			$quantity[1] = '0';
+			$quantity[1] = '';
 		
 		$location_records = $record->getRelatedRecords('tool_locations');
 		$location_quantity = 0;

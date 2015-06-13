@@ -98,14 +98,35 @@ class tables_inventory {
 			$quantity[1] = '.'.$quantity[1];
 		else
 			$quantity[1] = '';
-			
+
+		return $quantity[0] . rtrim($quantity[1],0);
+	}
+
+	function vehicle_quantity__display(&$record){
 		$location_records = $record->getRelatedRecords('inventory_locations');
 		$location_quantity = 0;
 		foreach ($location_records as $location_record){
 			$location_quantity += $location_record['quantity'];
 		}
 		
-		return $quantity[0] . $quantity[1] . " (" . $location_quantity . " assigned)";	}
+		//If 0, show blank
+		$location_quantity = ($location_quantity == 0) ? "" : $location_quantity;
+
+		return rtrim($location_quantity);
+	}
+
+	function stock_quantity__display(&$record){
+		$location_records = $record->getRelatedRecords('inventory_locations');
+		$location_quantity = 0;
+		foreach ($location_records as $location_record){
+			$location_quantity += $location_record['quantity'];
+		}
+		
+		//If 0, show blank
+		$location_quantity = ($location_quantity == 0) ? "" : $location_quantity;
+
+		return rtrim($record->val('quantity') - $location_quantity);
+	}
 	
 	function beforeSave(&$record){
 		//Calculate and Save Average

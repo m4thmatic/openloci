@@ -104,11 +104,14 @@
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=inventory"> View the Inventory</a>
 					</li>
 				</ul>
-			{elseif $inventory == "edit"}
+			{elseif $inventory == "edit" or $inventory == "overide"}
 				<br><b>INVENTORY</b><br>
 				<ul>
 					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=inventory"> View / Edit the Inventory</a>
+					</li>
+					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=vehicle_transfer"> Transfer Inventory</a>
 					</li>
 				</ul>
 			{/if}

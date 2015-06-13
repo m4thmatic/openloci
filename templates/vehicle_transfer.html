@@ -33,7 +33,10 @@
 				<p class="portalErrorMessage">No inventory selected for transfer. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
 			{else}
 		
-				<p class="portalMessage">The following inventory and tools have been transferred from {$veh_from} to {$veh_to} <br> <a href="index.php?-table=vehicle_transfer">View Transfer Record</a> <br> <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
+				<p class="portalMessage">The following inventory and tools have been transferred from {$from_name} to {$to_name}
+										<br> <a href="index.php?-table=vehicle_transfer&-action=browse&-recordid={$record_id}">View Transfer Record</a>
+										<br> <a href="index.php?-action=vehicle_transfer"> Create Another Transfer</a>
+										<br> <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
 				<table class="listing resultList">
 					<tr>
 						<th>Inventory ID</th>
@@ -84,82 +87,83 @@
 			
 			<p>Transfer from <b>{$from_n}</b> to <b>{$to_n}</b></p>
 
-			{if $error}
-				<p class="portalErrorMessage">Inventory selection error. <a href="index.php?-action=vehicle_transfer&status=transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
-			{else}
-				<!--form name="select_post" onSubmit='confirm_submit("select_post","confirm_post")'-->
-				<form name="select_inventory">
-					<input type="hidden" name="-action" value="vehicle_transfer">
-					<input type="hidden" name="status" value="transferred">
-					<input type="hidden" name="from_id" value="{$from_id}">
-					<input type="hidden" name="to_id" value="{$to_id}">
+			{if $error.none}
+				<p class="portalErrorMessage">Nothing selected.</p>
+			{elseif $error}
+				<p class="portalErrorMessage">Inventory selection error. See below for details.</p>
+			{/if}
+			<!--form name="select_post" onSubmit='confirm_submit("select_post","confirm_post")'-->
+			<form name="select_inventory">
+				<input type="hidden" name="-action" value="vehicle_transfer">
+				<input type="hidden" name="status" value="transferred">
+				<input type="hidden" name="from_id" value="{$from_id}">
+				<input type="hidden" name="to_id" value="{$to_id}">
 					
-					{if $inventory != NULL}
-						<p>Inventory</p>
-						<table class="listing resultList">
-							<tr>
-								<th><input type="checkbox" onchange=toggle_all("inventory[]",this.checked)></th>
-								<th>Inventory ID</th>
-								<th>Name</th>
-								<th>Quantity</th>
-								<th>(Total in Vehicle)</th>
-							</tr>
-							{$i = 0}
-							{foreach from=$inventory item=list}
-								{if $i%2 == 0}
-									<tr class="listing odd">
-								{else}
-									<tr class="listing even">
-								{/if}
-									<td><input type="checkbox" name="inventory[]" value="{$list.id}"></td>
-									<td valign="top">{$list.id}</a></td>
-									<td valign="top">{$list.name}</a></td>
-									<td valign="top"><input name="inv_quantity[{$list.id}]" value="{$list.quantity}"></td>
-									<td valign="top" style="text-align:right">{$list.quantity}</td>
-								</tr>
-								{assign var="i" value=$i+1}
-							{/foreach}
-						</table>
-						
-						<br>
-					{/if}
-					{if $tools != NULL}
-					<p>Tools</p>
+				{if $inventory != NULL}
+					<p>Inventory</p>
 					<table class="listing resultList">
 						<tr>
-							<th><input type="checkbox" onchange=toggle_all("tool[]",this.checked)></th>
-							<th>Tool ID</th>
+							<th>{if $from_id != 'inv'}<input type="checkbox" onchange=toggle_all("inventory[]",this.checked)>{/if}</th>
+							<th>Inventory ID</th>
 							<th>Name</th>
 							<th>Quantity</th>
-							<th>(Total in Vehicle)</th>
+							<th>(Total Available)</th>
 						</tr>
-						{assign var="i" value=0}
-						{foreach from=$tools item=list}
+						{$i = 0}
+						{foreach from=$inventory item=list}
 							{if $i%2 == 0}
 								<tr class="listing odd">
 							{else}
 								<tr class="listing even">
 							{/if}
-								<td><input type="checkbox" name="tool[]" value="{$list.id}"></td>
+								<td><input type="checkbox" name="inventory[]" value="{$list.id}" {if $inv_transfer[$list.id] != NULL}checked="checked"{/if}></td>
 								<td valign="top">{$list.id}</a></td>
 								<td valign="top">{$list.name}</a></td>
-								<td valign="top"><input name="tool_quantity[{$list.id}]" value="{$list.quantity}"></td>
+								<td valign="top"><input name="inv_quantity[{$list.id}]" value="{if $inv_transfer[$list.id] != NULL}{$inv_transfer[$list.id].quantity}{else}{$list.quantity}{/if}">{if $error.inv[$list.id] != NULL}<span style="color: red;">{$error.inv[$list.id]}</span>{/if}</td>
 								<td valign="top" style="text-align:right">{$list.quantity}</td>
 							</tr>
 							{assign var="i" value=$i+1}
 						{/foreach}
 					</table>
-
+						
 					<br>
-					{/if}
+				{/if}
+				{if $tools != NULL}
+				<p>Tools</p>
+				<table class="listing resultList">
+					<tr>
+						<th>{if $from_id != 'inv'}<input type="checkbox" onchange=toggle_all("tool[]",this.checked)>{/if}</th>
+						<th>Tool ID</th>
+						<th>Name</th>
+						<th>Quantity</th>
+						<th>(Total Available)</th>
+					</tr>
+					{assign var="i" value=0}
+					{foreach from=$tools item=list}
+						{if $i%2 == 0}
+							<tr class="listing odd">
+						{else}
+							<tr class="listing even">
+						{/if}
+							<td><input type="checkbox" name="tool[]" value="{$list.id}"{if $tool_transfer[$list.id] != NULL}checked="checked"{/if}></td>
+							<td valign="top">{$list.id}</a></td>
+							<td valign="top">{$list.name}</a></td>
+							<td valign="top"><input name="tool_quantity[{$list.id}]" value="{if $tool_transfer[$list.id] != NULL}{$tool_transfer[$list.id].quantity}{else}{$list.quantity}{/if}">{if $error.tool[$list.id] != NULL}<span style="color: red;">{$error.tool[$list.id]}</span>{/if}</td>
+							<td valign="top" style="text-align:right">{$list.quantity}</td>
+						</tr>
+						{assign var="i" value=$i+1}
+					{/foreach}
+				</table>
+
+				<br>
+				{/if}
 					
-					{if $inventory == NULL && $tools == NULL}
-						<p class="portalErrorMessage">Vehicle {$from_n} contains no inventory or tools. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Please select another vehicle.</a></p>
-					{else}
-						<input type="submit" value="Transfer">
-					{/if}
-				</form>
-			{/if}
+				{if $inventory == NULL && $tools == NULL}
+					<p class="portalErrorMessage">Vehicle {$from_n} contains no inventory or tools. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Please select another vehicle.</a></p>
+				{else}
+					<input type="submit" value="Transfer">
+				{/if}
+			</form>
 		{else}
 			{if $error == "selection_invalid"}
 				<p class="portalErrorMessage">One of more of the vehicles that you have selected is not valid.</p>
@@ -173,18 +177,18 @@
 				<input type="hidden" name="-action" value="vehicle_transfer">
 				<input type="hidden" name="status" value="transfer">
 				
-				<p>Transfer From Vehicle:
+				<p>Transfer From:
 				<select name="from_id" value={$from_id}>
-					<option value="">Please select a Vehicle</option>
+					<option value="">Select Location</option>
 					{foreach from=$vehicles item=vehicle}
 						<option value="{$vehicle.id}" {if $vehicle.id == $from_id}selected{/if}>{$vehicle.number}</option>
 					{/foreach}
 				</select>
 				</p>
 
-				<p>Transfer To Vehicle:
+				<p>Transfer To:
 				<select name="to_id" value={$to_id}>
-					<option value="">Please select a Vehicle</option>
+					<option value="">Select Location</option>
 					{foreach from=$vehicles item=vehicle}
 						<option value="{$vehicle.id}" {if $vehicle.id == $to_id}selected{/if}>{$vehicle.number}</option>
 					{/foreach}

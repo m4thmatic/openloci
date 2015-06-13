@@ -9,7 +9,7 @@ class actions_vehicle_transfer {
 		if ( !isUser() )
 			return Dataface_Error::permissionDenied("You are not logged in");
 		
-		if ( get_userPerms('vehicles') != "edit"){
+		if ( get_userPerms('vehicles') != "edit" && (get_userPerms('inventory') != "edit" || get_userPerms('inventory') != "overide")){
 			df_display(array("error"=>"permissions"), 'vehicle_transfer.html'); //Display page
 			return 0;
 		}
@@ -23,13 +23,16 @@ class actions_vehicle_transfer {
 		$status = isset($_GET['status']) ? $_GET['status'] : null;
 		$error = null;
 
+		$vehicles['inv']["id"] = 'inv';
+		$vehicles['inv']['number'] = "Inventory";
+		
 		//Pull Vehicle Data
 		$vehicle_records = df_get_records_array("vehicles",array('use_as_location'=>'Y'));
 		foreach($vehicle_records as $vehicle){
 			$vehicles[$vehicle->val('vehicle_id')]["id"] = $vehicle->val('vehicle_id');
 			$vehicles[$vehicle->val('vehicle_id')]["number"] = $vehicle->val('vehicle_number');
 		}
-		
+
 		//Vehicle Selection Screen
 		if($status == null){
 			unset($_SESSION["transfer_status"]); //Reset transfer_status session variable - in case it hasn't already been.
@@ -48,26 +51,59 @@ class actions_vehicle_transfer {
 				return 0;
 			}
 
-			//Pull from vehicle inventory
-			//$vehicle_inventory = df_get_records_array("vehicle_inventory",array('vehicle_id'=>$vehicles[$from_id]["id"], 'quantity'=>">0"));
-			$vehicle_inventory = df_get_records_array("vehicle_inventory",array('vehicle_id'=>$from_id, 'quantity'=>">0"));
-			foreach($vehicle_inventory as $inventory){
-				$inventory_record = df_get_record('inventory',array('inventory_id'=>$inventory->val('inventory_id')));
+			//Pull Inventory
+			if($from_id == "inv"){ //If "Inventory" is selected
+				//Get All Inventory
+				$main_inventory = df_get_records_array("inventory", array('quantity'=>">0"));
+				foreach($main_inventory as $inventory){
+					//Get the quantity already assigned to vehicles, to subtract from available quantity
+					$location_records = df_get_records_array('vehicle_inventory', array('inventory_id'=>$inventory->val('inventory_id')));
+					$location_quantity = 0;
+					foreach ($location_records as $location_record){
+						$location_quantity += $location_record->val('quantity');
+					}
 
-				$v_inventory[$inventory->val('inventory_id')]["id"] = $inventory->val('inventory_id');
-				$v_inventory[$inventory->val('inventory_id')]["quantity"] = $inventory->val('quantity');
-				$v_inventory[$inventory->val('inventory_id')]["name"] = $inventory_record->val('item_name');
+					$v_inventory[$inventory->val('inventory_id')]["id"] = $inventory->val('inventory_id');
+					$v_inventory[$inventory->val('inventory_id')]["quantity"] = $inventory->val('quantity') - $location_quantity;
+					$v_inventory[$inventory->val('inventory_id')]["name"] = $inventory->val('item_name');
+				}
+
+				//Get All Tool Inventory
+				$main_tools = df_get_records_array("tool_inventory", array('quantity'=>">0"));
+				foreach($main_tools as $tools){
+					//Get the quantity already assigned to vehicles, to subtract from available quantity
+					$location_records = df_get_records_array('vehicle_tools', array('tool_id'=>$tools->val('tool_id')));
+					$location_quantity = 0;
+					foreach ($location_records as $location_record){
+						$location_quantity += $location_record->val('quantity');
+					}
+
+					$v_tools[$tools->val('tool_id')]["id"] = $tools->val('tool_id');
+					$v_tools[$tools->val('tool_id')]["quantity"] = $tools->val('quantity') - $location_quantity;
+					$v_tools[$tools->val('tool_id')]["name"] = $tools->val('item_name');
+				}
 			}
-			
-			//Pull from vehicle tool inventory
-			//$vehicle_tools = df_get_records_array("vehicle_tools",array('vehicle_id'=>$vehicles[$from_id]["id"], 'quantity'=>">0"));
-			$vehicle_tools = df_get_records_array("vehicle_tools",array('vehicle_id'=>$from_id, 'quantity'=>">0"));
-			foreach($vehicle_tools as $tools){
-				$tool_record = df_get_record('tool_inventory',array('tool_id'=>$tools->val('tool_id')));
+			else{ //If a vehicle is selected
+				//Pull from vehicle inventory
+				$vehicle_inventory = df_get_records_array("vehicle_inventory",array('vehicle_id'=>$from_id, 'quantity'=>">0"));
+				foreach($vehicle_inventory as $inventory){
+					$inventory_record = df_get_record('inventory',array('inventory_id'=>$inventory->val('inventory_id')));
 
-				$v_tools[$tools->val('tool_id')]["id"] = $tools->val('tool_id');
-				$v_tools[$tools->val('tool_id')]["quantity"] = $tools->val('quantity');
-				$v_tools[$tools->val('tool_id')]["name"] = $tool_record->val('item_name');
+					$v_inventory[$inventory->val('inventory_id')]["id"] = $inventory->val('inventory_id');
+					$v_inventory[$inventory->val('inventory_id')]["quantity"] = $inventory->val('quantity');
+					$v_inventory[$inventory->val('inventory_id')]["name"] = $inventory_record->val('item_name');
+				}
+				
+				//Pull from vehicle tool inventory
+				//$vehicle_tools = df_get_records_array("vehicle_tools",array('vehicle_id'=>$vehicles[$from_id]["id"], 'quantity'=>">0"));
+				$vehicle_tools = df_get_records_array("vehicle_tools",array('vehicle_id'=>$from_id, 'quantity'=>">0"));
+				foreach($vehicle_tools as $tools){
+					$tool_record = df_get_record('tool_inventory',array('tool_id'=>$tools->val('tool_id')));
+
+					$v_tools[$tools->val('tool_id')]["id"] = $tools->val('tool_id');
+					$v_tools[$tools->val('tool_id')]["quantity"] = $tools->val('quantity');
+					$v_tools[$tools->val('tool_id')]["name"] = $tool_record->val('item_name');
+				}
 			}
 
 			$_SESSION['transfer_status'] = "transfer"; //Set transfer_status session variable to "transfer".
@@ -92,25 +128,48 @@ class actions_vehicle_transfer {
 
 				//Transfer Inventory
 				foreach($inv_transfer as $item){
-					$inv_transfer_record_from = df_get_record("vehicle_inventory", array("vehicle_id"=>$from_id,"inventory_id"=>$item['id']));
+					//Get From Source Record
+					if($from_id == "inv") //If from Inventory
+						$inv_transfer_record_from = df_get_record("inventory", array("inventory_id"=>$item['id']));
+					else //If from Vehicle
+						$inv_transfer_record_from = df_get_record("vehicle_inventory", array("vehicle_id"=>$from_id,"inventory_id"=>$item['id']));
 					
 					//Sanity check
-					if($item['quantity'] < 0)
-						$error["inv"][$item["id"]] = "neg";
+					//if(!is_numeric(trim($item['quantity'])))
+					if(!is_numeric(trim($item['quantity'])))
+						$error["inv"][$item["id"]] = "Not a Number";
+					elseif($item['quantity'] < 0)
+						$error["inv"][$item["id"]] = "Negative Number";
 					elseif($item['quantity'] > $inv_transfer_record_from->val("quantity"))
-						$error["inv"][$item["id"]] = "max";
-					else{
-						$inv_transfer_record_from->setValue('quantity', $inv_transfer_record_from->val("quantity") - $item['quantity'] );
-						$inv_transfer_record_to = df_get_record("vehicle_inventory", array("vehicle_id"=>$to_id,"inventory_id"=>$item['id']));
-						//If no record for the given vehicle / inventory item exists, then create a new one.
-						if($inv_transfer_record_to == null){
-							$inv_transfer_record_to = new Dataface_Record('vehicle_inventory', array());
-							$inv_transfer_record_to->setValues(array(
-								'vehicle_id'=>$to_id,
-								'inventory_id'=>$item["id"]
-							));
+						$error["inv"][$item["id"]] = "Greater Than Maximum Availble";
+					else{ //If no errors, proceed
+						//If from "inventory", don't change the value (will show up automatically as "assigned"), otherwise subtract the transferred amount
+						if($from_id != "inv")
+							$inv_transfer_record_from->setValue('quantity', $inv_transfer_record_from->val("quantity") - $item['quantity'] );
+						
+						//Get To Source Record
+						if($to_id == "inv"){ //If to Inventory
+							$inv_transfer_record_to = df_get_record("inventory", array("inventory_id"=>$item['id']));
+							
+							//Error check: If no record for the given item exists.
+							if($inv_transfer_record_to == null)
+								$error["inv"][$item["id"]] = "Item Does Not Exist (this should never happen! see System Admin!)";
+						//	else //Set Value
+						//		$inv_transfer_record_to->setValue('quantity', $inv_transfer_record_to->val("quantity") + $item['quantity'] );
 						}
-						$inv_transfer_record_to->setValue('quantity', $inv_transfer_record_to->val("quantity") + $item['quantity'] );
+						else{ //If to Vehicle
+							$inv_transfer_record_to = df_get_record("vehicle_inventory", array("vehicle_id"=>$to_id,"inventory_id"=>$item['id']));
+
+							//If no record for the given vehicle / inventory item exists, then create a new one.
+							if($inv_transfer_record_to == null){
+								$inv_transfer_record_to = new Dataface_Record('vehicle_inventory', array());
+								$inv_transfer_record_to->setValues(array(
+									'vehicle_id'=>$to_id,
+									'inventory_id'=>$item["id"]
+								));
+							}
+							$inv_transfer_record_to->setValue('quantity', $inv_transfer_record_to->val("quantity") + $item['quantity'] );
+						}
 					}
 				}
 			}
@@ -129,38 +188,121 @@ class actions_vehicle_transfer {
 			
 				//Transfer Tools
 				foreach($tool_transfer as $item){
-					$tool_transfer_record_from = df_get_record("vehicle_tools", array("vehicle_id"=>$from_id,"inventory_id"=>$item['id']));
+					//Get From Source Record
+					if($from_id == "inv") //If from Inventory
+						$tool_transfer_record_from = df_get_record("tool_inventory", array("tool_id"=>$item['id']));
+					else //If from Vehicle
+						$tool_transfer_record_from = df_get_record("vehicle_tools", array("vehicle_id"=>$from_id,"tool_id"=>$item['id']));
 
 					//Sanity check
-					if($item['quantity'] < 0)
-						$error["tool"][$item["id"]] = "neg";
+					if(!is_numeric(trim($item['quantity'])))
+						$error["tool"][$item["id"]] = "Not a Number";
+					elseif($item['quantity'] < 0)
+						$error["tool"][$item["id"]] = "Negative Number";
 					elseif($item['quantity'] > $tool_transfer_record_from->val("quantity"))
-						$error["tool"][$item["id"]] = "max";
-					else{
-						$tool_transfer_record_from->setValue('quantity', $tool_transfer_record_from->val("quantity") - $item['quantity'] );
-					
-						$tool_transfer_record_to = df_get_record("vehicle_tools", array("vehicle_id"=>$to_id,"inventory_id"=>$item['id']));
-						//If no record for the given vehicle / inventory item exists, then create a new one.
-						if($tool_transfer_record_to == null){
-							$tool_transfer_record_to = new Dataface_Record('vehicle_tools', array());
-							$tool_transfer_record_to->setValues(array(
-								'vehicle_id'=>$to_id,
-								'tool_id'=>$item["id"]
-							));
+						$error["tool"][$item["id"]] = "Greater Than Maximum Availble";
+					else{ //If no errors, proceed
+						//If from "inventory", don't change the value (will show up automatically as "assigned"), otherwise subtract the transferred amount
+						if($from_id != "inv")
+							$tool_transfer_record_from->setValue('quantity', $tool_transfer_record_from->val("quantity") - $item['quantity'] );
+						
+						//Get To Source Record
+						if($to_id == "inv"){ //If to Inventory
+							$tool_transfer_record_to = df_get_record("tool_inventory", array("tool_id"=>$item['id']));
+							
+							//Error check: If no record for the given item exists.
+							if($tool_transfer_record_to == null)
+								$error["tool"][$item["id"]] = "Item Does Not Exist (this should never happen! see System Admin!)";
+						//	else //Set Value
+						//		$tool_transfer_record_to->setValue('quantity', $tool_transfer_record_to->val("quantity") + $item['quantity'] );
 						}
-						$tool_transfer_record_to->setValue('quantity', $tool_transfer_record_to->val("quantity") + $item['quantity'] );
+						else{ //If to Vehicle
+							$tool_transfer_record_to = df_get_record("vehicle_tools", array("vehicle_id"=>$to_id,"tool_id"=>$item['id']));
+
+							//If no record for the given vehicle / inventory item exists, then create a new one.
+							if($tool_transfer_record_to == null){
+								$tool_transfer_record_to = new Dataface_Record('vehicle_tools', array());
+								$tool_transfer_record_to->setValues(array(
+									'vehicle_id'=>$to_id,
+									'tool_id'=>$item["id"]
+								));
+							}
+							$tool_transfer_record_to->setValue('quantity', $tool_transfer_record_to->val("quantity") + $item['quantity'] );
+						}
 					}
 				}
 			}
 			
-			//****************************************
+			if($inv_transfer == null && $tool_transfer == null)
+				$error["none"] = "none";
+			
+			//*** Error Handling ***
 			if($error != null){
-				print_r($error);
+				//echo "<pre>"; print_r($error); echo "</pre>";
+
+				//Pull Inventory
+				if($from_id == "inv"){ //If "Inventory" is selected
+					//Get All Inventory
+					$main_inventory = df_get_records_array("inventory", array('quantity'=>">0"));
+					foreach($main_inventory as $inventory){
+						//Get the quantity already assigned to vehicles, to subtract from available quantity
+						$location_records = df_get_records_array('vehicle_inventory', array('inventory_id'=>$inventory->val('inventory_id')));
+						$location_quantity = 0;
+						foreach ($location_records as $location_record){
+							$location_quantity += $location_record->val('quantity');
+						}
+
+						$v_inventory[$inventory->val('inventory_id')]["id"] = $inventory->val('inventory_id');
+						$v_inventory[$inventory->val('inventory_id')]["quantity"] = $inventory->val('quantity') - $location_quantity;
+						$v_inventory[$inventory->val('inventory_id')]["name"] = $inventory->val('item_name');
+					}
+
+					//Get All Tool Inventory
+					$main_tools = df_get_records_array("tool_inventory", array('quantity'=>">0"));
+					foreach($main_tools as $tools){
+						//Get the quantity already assigned to vehicles, to subtract from available quantity
+						$location_records = df_get_records_array('vehicle_tools', array('tool_id'=>$tools->val('tool_id')));
+						$location_quantity = 0;
+						foreach ($location_records as $location_record){
+							$location_quantity += $location_record->val('quantity');
+						}
+
+						$v_tools[$tools->val('tool_id')]["id"] = $tools->val('tool_id');
+						$v_tools[$tools->val('tool_id')]["quantity"] = $tools->val('quantity') - $location_quantity;
+						$v_tools[$tools->val('tool_id')]["name"] = $tools->val('item_name');
+					}
+				}
+				else{ //If a vehicle is selected
+					//Pull from vehicle inventory
+					$vehicle_inventory = df_get_records_array("vehicle_inventory",array('vehicle_id'=>$from_id, 'quantity'=>">0"));
+					foreach($vehicle_inventory as $inventory){
+						$inventory_record = df_get_record('inventory',array('inventory_id'=>$inventory->val('inventory_id')));
+
+						$v_inventory[$inventory->val('inventory_id')]["id"] = $inventory->val('inventory_id');
+						$v_inventory[$inventory->val('inventory_id')]["quantity"] = $inventory->val('quantity');
+						$v_inventory[$inventory->val('inventory_id')]["name"] = $inventory_record->val('item_name');
+					}
+					
+					//Pull from vehicle tool inventory
+					//$vehicle_tools = df_get_records_array("vehicle_tools",array('vehicle_id'=>$vehicles[$from_id]["id"], 'quantity'=>">0"));
+					$vehicle_tools = df_get_records_array("vehicle_tools",array('vehicle_id'=>$from_id, 'quantity'=>">0"));
+					foreach($vehicle_tools as $tools){
+						$tool_record = df_get_record('tool_inventory',array('tool_id'=>$tools->val('tool_id')));
+
+						$v_tools[$tools->val('tool_id')]["id"] = $tools->val('tool_id');
+						$v_tools[$tools->val('tool_id')]["quantity"] = $tools->val('quantity');
+						$v_tools[$tools->val('tool_id')]["name"] = $tool_record->val('item_name');
+					}
+				}
+
+				//unset($_SESSION["transfer_status"]); //Reset transfer_status session variable - in case it hasn't already been.
+				$status = "transfer";
+
 				//df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_n"=>$vehicles[$from_id]["number"],"to_n"=>$vehicles[$to_id]["number"],"status"=>$status,"error"=>$error), 'vehicle_transfer.html'); //Display page
-				echo "fail";
+				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_n"=>$vehicles[$from_id]["number"],"to_n"=>$vehicles[$to_id]["number"],"status"=>$status,"inventory"=>$v_inventory,"tools"=>$v_tools,"error"=>$error,"inv_transfer"=>$inv_transfer,"tool_transfer"=>$tool_transfer), 'vehicle_transfer.html'); //Display page
 				return 0;
 			}
-			//****************************************
+			//**********************
 			
 			if($_SESSION['transfer_status'] == "transfer"){ //Check session variable before save.
 				if(isset($inv_transfer)){
@@ -208,9 +350,13 @@ class actions_vehicle_transfer {
 				}
 			}
 
+			//Assign the appropriate name
+			$from_name = ($from_id == "inv") ? "Inventory" : $vehicles[$from_id]["number"];
+			$to_name = ($to_id == "inv") ? "Inventory" : $vehicles[$to_id]["number"];
+
 			//Display the page
 			if($_SESSION['transfer_status'] == "transfer") //Check session variable before displaying confirmation page.
-				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"veh_from"=>$vehicles[$from_id]["number"],"veh_to"=>$vehicles[$to_id]["number"],"status"=>$status,"inventory"=>$inv_transfer,"tools"=>$tool_transfer), 'vehicle_transfer.html');
+				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_name"=>$from_name,"to_name"=>$to_name,"status"=>$status,"inventory"=>$inv_transfer,"tools"=>$tool_transfer,"record_id"=>$vehicle_transfer_record->getID()), 'vehicle_transfer.html');
 			else //If not set, go back to the vehicle selection page.
 				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles), 'vehicle_transfer.html'); //Display page
 
