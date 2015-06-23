@@ -24,18 +24,18 @@
 			{/literal}
 			</script>
 	
-		<h1>Transfer Vehicle Inventory</h1>
+		<h1>Transfer Inventory</h1>
 		{if $error == "permissions"}
-			<p class="portalErrorMessage">You do not have sufficient permissions to transfer vehicle inventory. If you believe this is in error, please see your system administrator. <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
+			<p class="portalErrorMessage">You do not have sufficient permissions to transfer inventory, or vehicle inventory. If you believe this is in error, please see your system administrator. <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
 		
 		{elseif $status == "transferred"}
 			{if $inventory == NULL && $tools == NULL}
-				<p class="portalErrorMessage">No inventory selected for transfer. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
+				<p class="portalErrorMessage">No inventory selected for transfer. <a href="index.php?-action=inventory_transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
 			{else}
 		
 				<p class="portalMessage">The following inventory and tools have been transferred from {$from_name} to {$to_name}
-										<br> <a href="index.php?-table=vehicle_transfer&-action=browse&-recordid={$record_id}">View Transfer Record</a>
-										<br> <a href="index.php?-action=vehicle_transfer"> Create Another Transfer</a>
+										<br> <a href="index.php?-table=inventory_transfer&-action=browse&-recordid={$record_id}">View Transfer Record</a>
+										<br> <a href="index.php?-action=inventory_transfer"> Create Another Transfer</a>
 										<br> <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
 				<table class="listing resultList">
 					<tr>
@@ -82,7 +82,7 @@
 			{/if}
 		{elseif $status == "transfer"}
 			{if $from_id == NULL | $to_id == NULL}
-				<p class="portalErrorMessage">Vehicle not selected. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
+				<p class="portalErrorMessage">Inventory location not selected. <a href="index.php?-action=inventory_transfer&from_id={$from_id}&to_id={$to_id}"> Try Again.</a></p>
 			{/if}
 			
 			<p>Transfer from <b>{$from_n}</b> to <b>{$to_n}</b></p>
@@ -94,7 +94,7 @@
 			{/if}
 			<!--form name="select_post" onSubmit='confirm_submit("select_post","confirm_post")'-->
 			<form name="select_inventory">
-				<input type="hidden" name="-action" value="vehicle_transfer">
+				<input type="hidden" name="-action" value="inventory_transfer">
 				<input type="hidden" name="status" value="transferred">
 				<input type="hidden" name="from_id" value="{$from_id}">
 				<input type="hidden" name="to_id" value="{$to_id}">
@@ -159,22 +159,22 @@
 				{/if}
 					
 				{if $inventory == NULL && $tools == NULL}
-					<p class="portalErrorMessage">Vehicle {$from_n} contains no inventory or tools. <a href="index.php?-action=vehicle_transfer&from_id={$from_id}&to_id={$to_id}"> Please select another vehicle.</a></p>
+					<p class="portalErrorMessage">Location {$from_n} contains no inventory or tools. <a href="index.php?-action=inventory_transfer&from_id={$from_id}&to_id={$to_id}"> Please select another location.</a></p>
 				{else}
 					<input type="submit" value="Transfer">
 				{/if}
 			</form>
 		{else}
 			{if $error == "selection_invalid"}
-				<p class="portalErrorMessage">One of more of the vehicles that you have selected is not valid.</p>
+				<p class="portalErrorMessage">One of more of the locations that you have selected is not valid.</p>
 			{elseif $error == "selection_same"}
-				<p class="portalErrorMessage">You have selected the same vehicle.</p>
+				<p class="portalErrorMessage">You have selected the same location.</p>
 			{/if}
 			
-			<p>Select vehicles to transfer inventory between.</p>
+			<p>Select locations to transfer inventory between.</p>
 			
-			<form name="select_vehicles">
-				<input type="hidden" name="-action" value="vehicle_transfer">
+			<form name="select_locations">
+				<input type="hidden" name="-action" value="inventory_transfer">
 				<input type="hidden" name="status" value="transfer">
 				
 				<p>Transfer From:

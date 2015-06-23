@@ -1,6 +1,6 @@
 <?php
 
-class actions_vehicle_transfer {
+class actions_inventory_transfer {
 
 
 	function handle(&$params){
@@ -10,7 +10,7 @@ class actions_vehicle_transfer {
 			return Dataface_Error::permissionDenied("You are not logged in");
 		
 		if ( get_userPerms('vehicles') != "edit" && (get_userPerms('inventory') != "edit" || get_userPerms('inventory') != "overide")){
-			df_display(array("error"=>"permissions"), 'vehicle_transfer.html'); //Display page
+			df_display(array("error"=>"permissions"), 'inventory_transfer.html'); //Display page
 			return 0;
 		}
 		
@@ -36,18 +36,18 @@ class actions_vehicle_transfer {
 		//Vehicle Selection Screen
 		if($status == null){
 			unset($_SESSION["transfer_status"]); //Reset transfer_status session variable - in case it hasn't already been.
-			df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles), 'vehicle_transfer.html'); //Display page
+			df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles), 'inventory_transfer.html'); //Display page
 		}
 		
 		//Inventory Selection Screen
 		elseif($status == "transfer"){
 			//Check for erroneous vehicle selection - If so, redisplay the Vehicle Selection Screen
 			if( !(isset($vehicles[$from_id], $vehicles[$to_id])) ){ //If one or more of the vehicles hasn't been selected, or is invalid
-				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles,"error"=>"selection_invalid"), 'vehicle_transfer.html'); //Display page
+				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles,"error"=>"selection_invalid"), 'inventory_transfer.html'); //Display page
 				return 0;
 			}
 			elseif($from_id == $to_id){ //If the same vehicle is selected for both
-				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles,"error"=>"selection_same"), 'vehicle_transfer.html'); //Display page
+				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles,"error"=>"selection_same"), 'inventory_transfer.html'); //Display page
 				return 0;
 			}
 
@@ -108,7 +108,7 @@ class actions_vehicle_transfer {
 
 			$_SESSION['transfer_status'] = "transfer"; //Set transfer_status session variable to "transfer".
 			
-			df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_n"=>$vehicles[$from_id]["number"],"to_n"=>$vehicles[$to_id]["number"],"status"=>$status,"inventory"=>$v_inventory,"tools"=>$v_tools,"error"=>$error), 'vehicle_transfer.html'); //Display page
+			df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_n"=>$vehicles[$from_id]["number"],"to_n"=>$vehicles[$to_id]["number"],"status"=>$status,"inventory"=>$v_inventory,"tools"=>$v_tools,"error"=>$error), 'inventory_transfer.html'); //Display page
 		}
 		
 //Check for errors: sanity (not negative, number), quantity is more than max (not assigned), item exists - if error, redisplay inventory selection - keep current selection and highlight error?
@@ -298,8 +298,8 @@ class actions_vehicle_transfer {
 				//unset($_SESSION["transfer_status"]); //Reset transfer_status session variable - in case it hasn't already been.
 				$status = "transfer";
 
-				//df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_n"=>$vehicles[$from_id]["number"],"to_n"=>$vehicles[$to_id]["number"],"status"=>$status,"error"=>$error), 'vehicle_transfer.html'); //Display page
-				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_n"=>$vehicles[$from_id]["number"],"to_n"=>$vehicles[$to_id]["number"],"status"=>$status,"inventory"=>$v_inventory,"tools"=>$v_tools,"error"=>$error,"inv_transfer"=>$inv_transfer,"tool_transfer"=>$tool_transfer), 'vehicle_transfer.html'); //Display page
+				//df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_n"=>$vehicles[$from_id]["number"],"to_n"=>$vehicles[$to_id]["number"],"status"=>$status,"error"=>$error), 'inventory_transfer.html'); //Display page
+				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_n"=>$vehicles[$from_id]["number"],"to_n"=>$vehicles[$to_id]["number"],"status"=>$status,"inventory"=>$v_inventory,"tools"=>$v_tools,"error"=>$error,"inv_transfer"=>$inv_transfer,"tool_transfer"=>$tool_transfer), 'inventory_transfer.html'); //Display page
 				return 0;
 			}
 			//**********************
@@ -361,9 +361,9 @@ class actions_vehicle_transfer {
 
 			//Display the page
 			if($_SESSION['transfer_status'] == "transfer") //Check session variable before displaying confirmation page.
-				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_name"=>$from_name,"to_name"=>$to_name,"status"=>$status,"inventory"=>$inv_transfer,"tools"=>$tool_transfer,"record_id"=>$vehicle_transfer_record->getID()), 'vehicle_transfer.html');
+				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"from_name"=>$from_name,"to_name"=>$to_name,"status"=>$status,"inventory"=>$inv_transfer,"tools"=>$tool_transfer,"record_id"=>$vehicle_transfer_record->getID()), 'inventory_transfer.html');
 			else //If not set, go back to the vehicle selection page.
-				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles), 'vehicle_transfer.html'); //Display page
+				df_display(array("from_id"=>$from_id,"to_id"=>$to_id,"vehicles"=>$vehicles), 'inventory_transfer.html'); //Display page
 
 			unset($_SESSION["transfer_status"]); //Reset transfer_status session variable.
 		}
