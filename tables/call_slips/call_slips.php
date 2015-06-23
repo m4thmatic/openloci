@@ -511,7 +511,8 @@ class tables_call_slips {
 			else
 				$total_charge_to_customer = number_format($total_hours_sale+$total_materials_sale+$record->val('charge_consumables')+$record->val('charge_fuel'),2);
 				
-			$childString .= '<br><br><u><b>Total:</b> $<b>' . $total_charge_to_customer . '</b></u>';
+			$childString .= '<br><b>Total:</b> $<b>' . $total_charge_to_customer . '</b>';
+			$childString .= '<br><b>Total Billed:</b> $<b>' . $record->val('total_charge') . '</b>';
 
 
 		return array(
@@ -522,7 +523,9 @@ class tables_call_slips {
 		);
 	}
 
-	
+
+
+	//Modify CS Status
 	function section__status(&$record){
 		//Check permissions & if allowed, show Change Status button
 		if(get_userPerms('call_slips') == "edit" || get_userPerms('call_slips') == "post"){
@@ -797,7 +800,7 @@ class tables_call_slips {
 		require_once('tables/accounts_receivable/accounts_receivable.php');
 		$new_ar_id = tables_accounts_receivable::create_accounts_receivable_entry($record->val('call_id'), $record->val('customer_id'), $cs_total, $record->val('customer_po'));
 
-		//If no errors with creating AR entry, add total to customer balance.
+		//If no errors with creating AR entry, add total to customer balance & call slip total (for billing purposes).
 		if($new_ar_id > 0){
 			$customer_record = df_get_record('customers',array('customer_id'=>$record->val('customer_id'))); //Get Customer Record
 			if(isset($customer_record)){
@@ -806,6 +809,9 @@ class tables_call_slips {
 				$res = $customer_record->save(null, true); //Save balance, with permission check
 				if ( PEAR::isError($res) )
 					return -2;
+					
+				$record->setValue('total_charge',$cs_total);
+				$res = $record->save(null, true); //Save balance, with permission check
 			}
 			else
 				return -3;
@@ -823,7 +829,8 @@ class tables_call_slips {
 			return -1;
 	
 		$ar_record = df_get_record('accounts_receivable',array('voucher_id'=>$record->val('ar_billing_id')));
-
+		$amount = $ar_record->val("amount");
+		
 		//Check to insure the records exists
 		if($ar_record == null)
 			return -5; //Record is null
@@ -850,6 +857,24 @@ class tables_call_slips {
 		}
 		else
 			return -4; //Post Status is not null
+		
+		//Remove total from the customer balance & call slip billed.
+		$customer_record = df_get_record('customers',array('customer_id'=>$record->val('customer_id'))); //Get Customer Record
+		if(isset($customer_record)){
+			$customer_balance = $customer_record->val('balance'); //Get current customer balance
+			$customer_record->setValue('balance',$customer_balance-$amount); //Add call slip total to balance
+			$res = $customer_record->save(null, true); //Save balance, with permission check
+			if ( PEAR::isError($res) )
+				return -5;
+				
+			$record->setValue('total_charge',0);
+			$res = $record->save(null, true); //Save balance, with permission check
+
+		}
+		else
+			return -6;
+		
+		
 		
 		return 1;
 	}

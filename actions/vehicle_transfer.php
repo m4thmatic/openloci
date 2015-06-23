@@ -305,6 +305,7 @@ class actions_vehicle_transfer {
 			//**********************
 			
 			if($_SESSION['transfer_status'] == "transfer"){ //Check session variable before save.
+				//Save inventory transfer - NOTE: This could probably get combined with below, to save on processing time (wouldn't need multiple loops).
 				if(isset($inv_transfer)){
 					foreach($inv_transfer as $item){
 						$res = $inv_transfer_record_from[$item['id']]->save();
