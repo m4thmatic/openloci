@@ -53,7 +53,7 @@ class tables_accounts_payable_batch {
 			foreach($voucherRecords as $voucherRecord){
 				$ap_voucherRecord = df_get_record('accounts_payable', array('voucher_id'=>$voucherRecord['voucher_id']));
 				$childString .= '<tr>' .
-									'<td><a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_payable">' . $voucherRecord['voucher_id'] . '</a></td>' .
+									'<td><a href="index.php?-action=browse&-table=accounts_payable&-recordid='.urlencode($ap_voucherRecord->getID()).'">' . $voucherRecord['voucher_id'] . '</a></td>' .
 									'<td>' . $ap_voucherRecord->strval('voucher_date') . '</td>' .
 									'<td>' . $ap_voucherRecord->strval('post_date') . '</td>' .
 								'</tr>';

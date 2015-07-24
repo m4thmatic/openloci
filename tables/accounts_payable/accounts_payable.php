@@ -40,6 +40,20 @@ class tables_accounts_payable {
 		return date('Y-m-d');
 	}
 
+	function account_credit__default(){
+		$account_settings = df_get_record("_account_defaults",array("default_id"=>1));
+		return $account_settings->val("accounts_payable");
+	}
+
+	function account_debit__default(){
+		$app =& Dataface_Application::getInstance(); 
+		$record =& $app->getRecord();
+
+		$vendor_record = df_get_record("vendors",array("vendor_id"=>$record->val("vendor_id")));
+		return $vendor_record->val("default_account");
+	}
+	
+	
 	function amount__display(&$record){
 		if($record->val('amount') != NULL)
 			return "$" . $record->val('amount');
