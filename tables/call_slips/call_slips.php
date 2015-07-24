@@ -19,7 +19,9 @@ VOID				---								N
 class tables_call_slips {
 
 	//Class Variables
-	private $cs_modify_inventory = array(); //Create a class variable to store the values for modifying the inventory
+//	private $cs_modify_inventory = array(); //Create a class variable to store the values for modifying the inventory
+//	private $cs_modify_inventory_location = array(); //Create a class variable to store the location for modifying the inventory
+
 
 	//Permissions
 		function getPermissions(&$record){
@@ -68,6 +70,14 @@ class tables_call_slips {
 					case "VOID":
 					echo "<style>#record-tabs-edit{display: none;}</style>";
 				}
+
+			//For Testing Purposes: Display Session Log Data
+			//if(isset($_SESSION["log_data"])){
+			//	echo $_SESSION["log_data"];
+			//	unset($_SESSION["log_data"]);
+			//}
+			//else
+			//	$_SESSION["log_data"] = "";
 		}
 		
 		function status__permissions(&$record){
@@ -974,191 +984,136 @@ class tables_call_slips {
 	}
 	
 	
-	
-	//Calendar Module Functions
-		function getBgColor($record){
-			if ( $record->val('technician') == 1) return 'blue';
-			if ( $record->val('technician') == 2) return 'blueviolet';
-			if ( $record->val('technician') == 3) return 'brown';
-			if ( $record->val('technician') == 4) return 'cadetblue';
-			if ( $record->val('technician') == 5) return 'chocolate';
-			if ( $record->val('technician') == 6) return 'cornflowerblue';
-			if ( $record->val('technician') == 7) return 'crimson';
-			if ( $record->val('technician') == 8) return 'darkcyan';
-			if ( $record->val('technician') == 9) return 'darkred';
-			if ( $record->val('technician') == 10) return 'green';
-			if ( $record->val('technician') == 11) return 'goldenrod';
-			else return 'rgb(0,0,0)';
-		}
-		
-		function calendar__decorateEvent(Dataface_Record $record, &$event){
-			$rec_site = df_get_record('customer_sites', array('site_id'=>$record->val('site_id')));
-			$rec_empl = df_get_record('employees', array('employee_id'=>$record->val('technician')));
-			$event['title'] = "\nTech: " . $rec_empl->val('first_name') . " " . $rec_empl->val('last_name') . "\nSite: " . $rec_site->val('address');
-		}
-
-
-
 	//PROCESSING
 
-	function inventory__validate(&$record, $value, &$params){
+	function inventory__validate(&$record, $new_csi_records, &$params){
 		//Empty the error message
 		$params['message'] = '';
 
-		//Get the Call Slip ID
-		$csid = $record->val('call_id');
-		
-		//Get rid of the last set in the array - it isn't needed for our use and causes issues
-		unset($value['__loaded__']);
+		//Parse through the data in the form - check for errors & save to record "pouch" for processing in beforeSave()
+		foreach ($new_csi_records as $key => $new_csi_record){
+			//For Testing Purposes: Display new form data
+			//$params['message'] .= print_r($new_csi_record,true);
 
-		//Determine what to add/subtract from the general inventory.
-		//  First - Run through the data in the form list
-		foreach ($value as $x){
+			//Skip any lines that aren't integers (i.e. __loaded__, __deleted__, etc)
+			if(is_int($key)){
 
-			//Skip empty lines - do nothing (unless a quantity has been assigned, and then return an error)
-			if($x['inventory_id'] == ''){
-				if($x['quantity']){ //Case where the 'item_name' field has been left empty, but a quantity has been given
-					$params['message'] .= 'CANNOT PROCESS INVENTORY: A quantity has been given, but an "Item Name" has not been assigned.';
-					return false;
+				//If an inventory item has *not* been assigned - check for other assigned data (error), or ignore line
+				if($new_csi_record['inventory_id'] == ''){
+					//If the inventory item field has been left empty, but other data has been assigned - Error
+					if($new_csi_record['quantity'] || $new_csi_record['sale_price'] || $new_csi_record['location']){
+						$params['message'] .= 'Error: An inventory item has been left unassigned.';
+						return false;
+					}
 				}
-			}
+				else{ //Validate non-empty lines
 
-			//Process non-empty lines
-			else{
-				//$params['message'] .= $x['inventory_id'] . ' -> ' . $x['quantity'] . '<br>';
+					//Pull record from the "inventory" table.
+					$gen_inventory_record = df_get_record('inventory', array('inventory_id'=>$new_csi_record['inventory_id']));
+					$item_name = $gen_inventory_record->display('item_name');
 
-				//Pull data from the "call_slip_inventory" and "inventory" tables.
-				$cs_inv = df_get_record('call_slip_inventory', array('call_id'=>$csid, 'inventory_id'=>$x['inventory_id']));
-				$gen_inv = df_get_record('inventory', array('inventory_id'=>$x['inventory_id']));
+					//Check if "call_slip_inventory" record already exists
+					if($new_csi_record["__id__"] != "new"){ //Yes
+						//Pull record from the "call_slip_inventory" table
+						parse_str($new_csi_record["__id__"], $csi_id);//Parse the __id__ field
+						$csi_id = $csi_id["call_slip_inventory::csi_id"];//to get the call_slip_inventory record ID
+						$cs_inventory_record = df_get_record('call_slip_inventory', array('csi_id'=>$csi_id));
+						
+						$old_item = $cs_inventory_record->val("inventory_id");
+						$old_quantity = $cs_inventory_record->val("quantity");
+						$old_location = $cs_inventory_record->val("location");
+					}
+					else{ //No - i.e. new record
+						$old_item = "";
+						$old_quantity = 0;
+						$old_location = "inv";
+					}
 
-				//Create some variables for simplicity.
-				$item_name = $gen_inv->display('item_name');
-				$gen_inv_q = $gen_inv->display('quantity');
-				$new_cs_i_q = $x['quantity'];
+					$new_item = $new_csi_record['inventory_id'];
+					$new_quantity = $new_csi_record['quantity'];
+					$new_location = ($new_csi_record['location'] == "") ? 'inv' : $new_csi_record['location']; //If blank, assign to "inv" otherwise use the assigned location
+					
+					//Check insure that each item in only entered in once per location. **Note: This seems ideal from a user perspective to help mitigate errors, however this also simplifies things in regards to processing, and allows us to safely ignore some things that would otherwise have to be handled.
+					foreach ($new_csi_records as $key_check => $rec_check)
+					{
+						//Ignore the current line
+						if($key != $key_check && is_int($key_check)){ //or ($new_csi_record['__order__'] != $rec_check['__order__'])
+							$location_check = ($rec_check['location'] == "") ? 'inv' : $rec_check['location']; //If blank, assign to "inv" otherwise use the assigned location
+							//Check for same 'inventory_id' and same 'location'
+							if( ($new_csi_record['inventory_id'] == $rec_check['inventory_id']) && ($location == $location_check) ){
+								$params['message'] .= 'Error: The item: "'. $item_name .'" has been added multiple times from the same location. Please add each item only once from a given location.<br>';
+								return 0;
+							}
+						}
+					}
 
+					//Get available quantity
+					if($new_location == "inv"){
+						$available_quantity = tables_inventory::inStock($gen_inventory_record);
+					}
+					else{
+						$location_record = df_get_record('vehicle_inventory', array('vehicle_id'=>$new_location,'inventory_id'=>$new_csi_record['inventory_id']));
+						$available_quantity = ($location_record != null) ? $location_record->val("quantity") : -1; //If $location_record does not exist, set to -1 (error)
+					}	
+
+					//Check to insure that the available quantity exists (no errors)
+					if($available_quantity == -1){
+							$params['message'] .= 'Error: There is no inventory record available for item: "'. $item_name .'" at the given location.<br>';
+						return 0;
+					}
+					
+					//Check for quantity errors
+					//Check for negative and non numbers
+					if($new_quantity < 0 || !is_numeric($new_quantity)){
+						$params['message'] .= 'Error: The quantity for item: "'. $item_name .'" must be a valid positive number.<br>';
+						return 0;
+					}
+					//If "Location" or "Item" has changed
+					elseif(($old_location != $new_location) || ($old_item != $new_item)){
+						if($available_quantity < $new_quantity){
+							$params['message'] .= 'Error: The item: "'. $item_name .'" exceeds maximum inventory available for the given location.<br>';
+							return 0;
+						}
+					}
+					//If only "Quantity" has changed
+					elseif($old_quantity != $new_quantity){
+						if($available_quantity < $new_quantity - $old_quantity){
+							$params['message'] .= 'Error: The item: "'. $item_name .'" exceeds maximum inventory available for the given location.<br>';
+							return 0;
+						}
+					}
 				
-				//Check insure that each item in only entered in once.
-				//We do this to simplify things significantly, and allow us to safely ignore some things that would otherwise have to be handled.
-				foreach ($value as $y)
-				{
-					//Check if different lines have the same 'inventory_id'
-					if( ($x['__order__'] != $y['__order__']) && ($x['inventory_id'] == $y['inventory_id'])){
-						$params['message'] .= 'CANNOT PROCESS INVENTORY: The item: "'. $item_name .'" has been added multiple times. Please add each item only once.<br>';
-						return 0;
-					}
-				}
 
-				//If this is a new entry, $cur_cs_i_q = 0
-				if(!$cs_inv)
-					$cur_cs_i_q = 0;
-
-				//Otherwise, pull from the 'call_slip_inventory' record
-				else
-					$cur_cs_i_q = $cs_inv->display('quantity');
-
-				//Modify inventory variable.
-				$mod_inv = $new_cs_i_q - $cur_cs_i_q;
-
-				//Check if the quantity has changed. If so... do some things.
-				if($new_cs_i_q != $cur_cs_i_q){
-					//First we check to make sure that the quantity of the item being added is not greater than what's in the inventory.
-					//If it is, cause an error and go no further.
-					if($mod_inv > $gen_inv_q){
-						$params['message'] .=	'CANNOT PROCESS INVENTORY: The current stock in inventory for "'. $item_name .'" is ' . $gen_inv_q . '.<br>' .
-												'You are trying to add ' . $mod_inv . ' which exceeds the amount in inventory.<br>';
-						return 0;
-					}
-					
-					//Next check to make sure the quantity entered is not negative
-					//If it is, cause an error and go no further.
-					if($new_cs_i_q < 0){
-						$params['message'] .=	'CANNOT PROCESS INVENTORY: Negative inventory for "'. $item_name .'" cannot be added.<br>';
-						return 0;
-					}
-					
-
-					//Now, save the inventory modification to the class variable cs_modify_inventory. The actual inventory will be modified/saved in the beforeSave() function.
-					//We don't save here because 1) this function is actually run twice, and thus the inventory would be modified x2, and 2) other potential validation checks failing.
-					$this->cs_modify_inventory[$x['inventory_id']] = (- $mod_inv);
-
-					//*****Output for testing purposes
-					//$params['message'] .= 'Value for "'. $item_name.'" has been modified. Changing from ' . $cur_cs_i_q . ' to ' . $new_cs_i_q . '.<br>';
-					//$params['message'] .=	'Modify inventory by: ' . $mod_inv . '.<br>' .
-					//						'Inventory was: ' . $gen_inv_q . ', Will now be: ' . ($gen_inv_q-$mod_inv) . '<br>';
-					//*****
+					//If there were no validation errors, save inventory record data to the pouch
+					$record->pouch["cs_inventory_records"][$key] = $new_csi_record;
 				}
 			}
 		}
 
-		//  Now check to see if any lines have been removed
-		$cs_inv = df_get_records_array('call_slip_inventory', array('call_id'=>$csid));
-		foreach($cs_inv as $x)
-		{
-			//Clear the "found" key
-			$found = 0;
-			
-			//Compare against the lines in $value to see if any are missing.
-			foreach ($value as $y){
-				//Check if the 'inventory_id' is in the list and set key
-				if( $x->val('inventory_id') == $y['inventory_id'])
-					$found = 1;
-			}
+		//For Testing Purposes: Insure that the validation check fails.
+		//$params['message'] .= "done.";
+		//return 0;
 
-			//If the item was not found, it has been removed, and we add the quantity back to inventory.
-			if($found == 0){
-				//Get matching inventory record
-				$gen_inv = df_get_record('inventory', array('inventory_id'=>$x->val('inventory_id')));
-				$gen_inv_q = $gen_inv->display('quantity');
-
-				//Modify the inventory.
-				$this->cs_modify_inventory[$x->val('inventory_id')] = $x->val('quantity');
-
-
-				//*****Output for testing purposes
-				//$params['message'] .=	'Item '. $gen_inv->val('item_name') .' Removed!<br>'.
-				//						'Modify inventory by: ' . $x->val('quantity') . '.<br>' .
-				//						'Inventory was: ' . $gen_inv_q . ', Will now be: ' . ($gen_inv_q+$x->val('quantity')) . '<br>';
-				//*****
-
-			}
-		}
-		
 		//If no errors have occured, move along.
-		//print_r($this->cs_modify_inventory);
 		return 1;
 	}
 
 	function beforeSave(&$record){
-		//$response =& Dataface_Application::getResponse();
-		//$rlist = 'a';
-		/*
-		if($record->val('status') == '')
-			$record->setValue('status','NCO');
-		
-		if($record->val('call_datetime') == '')
-			$record->setValue('call_datetime',date('Y-m-d g:i a'));
-		*/
+
 		//*****************************************************************
 		//********************Inventory Management Code********************
 		//*****************************************************************
 
-		//Get inventory modification values from the class variable cs_modify_inventory
-		foreach($this->cs_modify_inventory as $iid=>$modify){
-			$gen_inv = df_get_record('inventory', array('inventory_id'=>$iid));
-			$gen_inv->setValue('quantity',($gen_inv->val('quantity') + $modify));
-			//$gen_inv->save(null, true);
-			$gen_inv->save();
-			//return PEAR::raiseError('END',DATAFACE_E_NOTICE);
-		}
+			//This is now handled in call_slip_inventory.php directly.
+			//Validation checks for all rows are done in inventory__validate()
+			//above, so if there are any errors it shouldn't get this far.
 
 		//*********************************************************************
 		//********************END Inventory Management Code********************
 		//*********************************************************************
 
-		//if($rlist){
-		//	$response['--msg'] = "Data: ".$rlist;
-		//	return PEAR::raiseError("FIN",DATAFACE_E_NOTICE);
-		//}
+		//For Testing Purposes: Insure nothing gets saved.
+		//return PEAR::raiseError("FIN",DATAFACE_E_NOTICE);
 	}
 
 	function beforeInsert(&$record){
@@ -1328,6 +1283,30 @@ class tables_call_slips {
 			return number_format($total,2);
 		}
 
+		
+		
+	//Calendar Module Functions
+		function getBgColor($record){
+			if ( $record->val('technician') == 1) return 'blue';
+			if ( $record->val('technician') == 2) return 'blueviolet';
+			if ( $record->val('technician') == 3) return 'brown';
+			if ( $record->val('technician') == 4) return 'cadetblue';
+			if ( $record->val('technician') == 5) return 'chocolate';
+			if ( $record->val('technician') == 6) return 'cornflowerblue';
+			if ( $record->val('technician') == 7) return 'crimson';
+			if ( $record->val('technician') == 8) return 'darkcyan';
+			if ( $record->val('technician') == 9) return 'darkred';
+			if ( $record->val('technician') == 10) return 'green';
+			if ( $record->val('technician') == 11) return 'goldenrod';
+			else return 'rgb(0,0,0)';
+		}
+		
+		function calendar__decorateEvent(Dataface_Record $record, &$event){
+			$rec_site = df_get_record('customer_sites', array('site_id'=>$record->val('site_id')));
+			$rec_empl = df_get_record('employees', array('employee_id'=>$record->val('technician')));
+			$event['title'] = "\nTech: " . $rec_empl->val('first_name') . " " . $rec_empl->val('last_name') . "\nSite: " . $rec_site->val('address');
+		}
+		
 
 }
 ?>

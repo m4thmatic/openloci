@@ -129,7 +129,7 @@ class tables_inventory {
 	}
 	
 	function beforeSave(&$record){
-		//Calculate and Save Average
+		//Update Average Purchase Price
 			$purchase_history_records = $record->getRelatedRecords('inventory_purchase_history');
 
 			$purchase_total = 0;
@@ -146,7 +146,6 @@ class tables_inventory {
 				$average = number_format($purchase_total / $count, 2);
 				$record->setValue('average_purchase',$average);
 			}
-
 	}
 	
 	function beforeInsert(&$record){
@@ -154,6 +153,19 @@ class tables_inventory {
 			$record->setValue('average_purchase',0);
 	}
 	
+	function inStock($record){
+		//Check to insure $record exists
+		if($record == null)
+			return -1;
+	
+		$location_records = $record->getRelatedRecords('inventory_locations');
+		$location_quantity = 0;
+		foreach ($location_records as $location_record){
+			$location_quantity += $location_record['quantity'];
+		}
+		
+		return $record->val('quantity') - $location_quantity;
+	}
 }
 
 ?>
