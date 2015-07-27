@@ -180,7 +180,7 @@ CREATE TABLE `_record_versioning__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`record_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=385 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=399 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -484,7 +484,43 @@ CREATE TABLE `call_slip_inventory__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`csi_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=53 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=54 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `call_slip_purchase_orders` (
+  `list_id` tinyint NOT NULL,
+  `purchase_id` tinyint NOT NULL,
+  `item_name` tinyint NOT NULL,
+  `quantity` tinyint NOT NULL,
+  `quantity_used` tinyint NOT NULL,
+  `sale_price` tinyint NOT NULL,
+  `purchase_price` tinyint NOT NULL,
+  `callslip_id` tinyint NOT NULL,
+  `post_status` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `call_slip_purchase_orders__history` (
+  `history__id` int(11) NOT NULL AUTO_INCREMENT,
+  `history__language` varchar(2) DEFAULT NULL,
+  `history__comments` text,
+  `history__user` varchar(32) DEFAULT NULL,
+  `history__state` int(5) DEFAULT '0',
+  `history__modified` datetime DEFAULT NULL,
+  `list_id` int(11) DEFAULT NULL,
+  `purchase_id` int(11) DEFAULT NULL,
+  `item_name` varchar(100) DEFAULT NULL,
+  `quantity` decimal(15,4) DEFAULT NULL,
+  `quantity_used` decimal(15,4) DEFAULT NULL,
+  `sale_price` decimal(11,2) DEFAULT NULL,
+  `purchase_price` decimal(11,2) DEFAULT NULL,
+  `callslip_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`history__id`),
+  KEY `prikeys` (`list_id`) USING HASH,
+  KEY `datekeys` (`history__modified`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -552,7 +588,7 @@ CREATE TABLE `call_slips__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`call_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=199 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=206 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -728,7 +764,7 @@ CREATE TABLE `customers__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`customer_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1526,9 +1562,9 @@ CREATE TABLE `purchase_order_service_items` (
   `list_id` int(11) NOT NULL AUTO_INCREMENT,
   `purchase_order_id` int(11) NOT NULL,
   `item_name` varchar(100) NOT NULL,
-  `quantity` int(10) DEFAULT NULL,
-  `quantity_received` int(10) DEFAULT NULL,
-  `quantity_used` int(10) DEFAULT NULL,
+  `quantity` decimal(15,4) DEFAULT NULL,
+  `quantity_received` decimal(15,4) DEFAULT NULL,
+  `quantity_used` decimal(15,4) DEFAULT NULL,
   `purchase_price` decimal(11,2) DEFAULT NULL,
   `sale_price` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`list_id`)
@@ -1555,7 +1591,7 @@ CREATE TABLE `purchase_order_service_items__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`list_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=138 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=140 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2194,6 +2230,19 @@ CREATE TABLE `vendors__history` (
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `accounts_payable_unassigned_purchase_orders` AS (select `purchase_order_inventory`.`purchase_order_id` AS `purchase_order_id`,`purchase_order_inventory`.`assigned_voucher_id` AS `assigned_voucher_id`,`purchase_order_inventory`.`vendor_id` AS `vendor_id` from `purchase_order_inventory` where isnull(`purchase_order_inventory`.`assigned_voucher_id`)) union (select `purchase_order_service`.`purchase_order_id` AS `purchase_order_id`,`purchase_order_service`.`assigned_voucher_id` AS `assigned_voucher_id`,`purchase_order_service`.`vendor_id` AS `vendor_id` from `purchase_order_service` where isnull(`purchase_order_service`.`assigned_voucher_id`)) union (select `purchase_order_tool`.`purchase_order_id` AS `purchase_order_id`,`purchase_order_tool`.`assigned_voucher_id` AS `assigned_voucher_id`,`purchase_order_tool`.`vendor_id` AS `vendor_id` from `purchase_order_tool` where isnull(`purchase_order_tool`.`assigned_voucher_id`)) union (select `purchase_order_vehicle`.`purchase_order_id` AS `purchase_order_id`,`purchase_order_vehicle`.`assigned_voucher_id` AS `assigned_voucher_id`,`purchase_order_vehicle`.`vendor_id` AS `vendor_id` from `purchase_order_vehicle` where isnull(`purchase_order_vehicle`.`assigned_voucher_id`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP TABLE IF EXISTS `call_slip_purchase_orders`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `call_slip_purchase_orders` AS select `purchase_order_service_items`.`list_id` AS `list_id`,`purchase_order_service_items`.`purchase_order_id` AS `purchase_id`,`purchase_order_service_items`.`item_name` AS `item_name`,`purchase_order_service_items`.`quantity` AS `quantity`,`purchase_order_service_items`.`quantity_used` AS `quantity_used`,`purchase_order_service_items`.`sale_price` AS `sale_price`,`purchase_order_service_items`.`purchase_price` AS `purchase_price`,`purchase_order_service`.`callslip_id` AS `callslip_id`,`purchase_order_service`.`post_status` AS `post_status` from (`purchase_order_service_items` join `purchase_order_service`) where (`purchase_order_service_items`.`purchase_order_id` = `purchase_order_service`.`purchase_id`) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
