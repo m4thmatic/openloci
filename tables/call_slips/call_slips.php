@@ -499,7 +499,7 @@ class tables_call_slips {
 
 
 			//Additional Charges (consumables / fuel)
-			if($record->val('charge_consumables') || $record->val('charge_fuel')){
+			if($record->val('charge_consumables') || $record->val('charge_fuel') || $record->val('tax')){
 				$childString .= "<br><b><u>Additional Charges</u></b><br><br>";
 				$childString .= '<table class="view_add">';
 				$childString .= "<tr><th>Charge Type</th><th>Amount</th></tr>";
@@ -510,7 +510,10 @@ class tables_call_slips {
 				if($record->val('charge_fuel') )
 					$childString .= "<tr><td>Fuel</td><td>$" . $record->val('charge_fuel') . "</td></tr>";
 					
-				$childString .= '</table>';
+				if($record->val('tax') )
+					$childString .= "<tr><td>Tax</td><td>$" . $record->val('tax') . "</td></tr>";
+
+					$childString .= '</table>';
 			}
 
 			//Total
@@ -519,7 +522,7 @@ class tables_call_slips {
 			elseif($record->val('type') == "SW")
 				$total_charge_to_customer = "0.00 (Service Warranty)";
 			else
-				$total_charge_to_customer = number_format($total_hours_sale+$total_materials_sale+$record->val('charge_consumables')+$record->val('charge_fuel'),2);
+				$total_charge_to_customer = number_format($total_hours_sale+$total_materials_sale+$record->val('charge_consumables')+$record->val('charge_fuel')+$record->val('tax'),2);
 				
 			$childString .= '<br><b>Total:</b> $<b>' . $total_charge_to_customer . '</b>';
 			$childString .= '<br><b>Total Billed:</b> $<b>' . $record->val('total_charge') . '</b>';
@@ -573,7 +576,7 @@ class tables_call_slips {
 						else
 							$status_msg = 'An error occured while trying to Create a Billing Entry. You may not have the proper permissions. (ERROR '. $billing_id .')';
 						break;
-					case("Unbill"): //Pressed: Unbill
+					case("Recall Billing"): //Pressed: Recall Billing (formerly "Unbill")
 						$unbill = $this->unbill_cs($record); //Create a Credit Call Slip, and Reverse the billing entry on this one in Accounts Receivable.
 						if($unbill == 1){
 							$record->setValue('status',"CMP");
@@ -657,7 +660,7 @@ class tables_call_slips {
 				
 				//Status: Billing Pending
 				elseif($record->val('status') == "BPD"){
-					$childString .= '<input type="submit" name="status_button" value="Unbill"> (This will remove the associated Accounts Payable Entry)';
+					$childString .= '<input type="submit" name="status_button" value="Recall Billing"> (This will remove the associated Accounts Payable Entry)';
 				}
 				
 				//Status: Billed
@@ -689,7 +692,7 @@ class tables_call_slips {
 		
 		if($record->val('type') == "TM"){
 		
-			$cs_total = 0;
+			//$cs_total = 0;
 			
 			//Collect Billing Details for Time Logs
 			$timelog_records = $record->getRelatedRecords('time_logs');
@@ -703,7 +706,8 @@ class tables_call_slips {
 				$rate_record = df_get_record('rates', array('rate_id'=>$cs_tl['rate_id']));
 				$rate = $rate_record->val($cs_tl['rate_type']);
 				
-				$cs_total += $rate * $hours;
+				//$cs_total += $rate * $hours;
+				$cs_labor_total = $rate * $hours;
 			}
 				
 			//Collect Billing Details for Inventory Items
@@ -746,10 +750,12 @@ class tables_call_slips {
 				}
 				
 				//Save inventory sale price to total
-				$cs_total += $sale_price * $cs_ir->val('quantity');
+				//$cs_total += $sale_price * $cs_ir->val('quantity');
+				$cs_inventory_total = $sale_price * $cs_ir->val('quantity');
 			}
 
 			//Collect Billing Details for Purchase Order Items
+			$cs_po_total = 0;
 			$purchaseRecords = df_get_records_array('purchase_order_service', array('callslip_id'=>$record->val('call_id')));
 			foreach ($purchaseRecords as $cs_pr){
 				//Pull the items from the purchase order record
@@ -786,21 +792,27 @@ class tables_call_slips {
 					$res = $item->save(null,true); //Save Record w/ permission check.
 
 					//Save PO item sale price to total
-					$cs_total += $sale_price * $item->val('quantity_used');
+					//$cs_total += $sale_price * $item->val('quantity_used');
+					$cs_po_total += $sale_price * $item->val('quantity_used');
 				}
 			}
 
 			//Collect Billing Details for Additional Material Items
+			$cs_materials_total = 0;
 			$materialRecords = df_get_records_array('call_slip_additional_materials', array('call_id'=>$record->val('call_id')));
 			foreach ($materialRecords as $cs_mr){
 				$sale_price = $cs_mr->val('sale_price'); //Pull sale price from record
 				$quantity = $cs_mr->val('quantity'); //Pull quantity price from record
 				
-				$cs_total += $sale_price * $quantity;
+				//$cs_total += $sale_price * $quantity;
+				$cs_materials_total += $sale_price * $quantity;
 			}
 			
-			$cs_total += $record->val('charge_consumables');
-			$cs_total += $record->val('charge_fuel');
+			$cs_consumables_total = $record->val('charge_consumables');
+			$cs_fuel_total = $record->val('charge_fuel');
+			$cs_tax_total = $record->val('tax');
+			
+			$cs_total = $cs_labor_total + $cs_inventory_total + $cs_po_total + $cs_materials_total + $cs_consumables_total + $cs_fuel_total + $cs_tax_total;
 		}
 		else{
 			$cs_total = $record->val("quoted_cost");
@@ -810,8 +822,24 @@ class tables_call_slips {
 		require_once('tables/accounts_receivable/accounts_receivable.php');
 		$new_ar_id = tables_accounts_receivable::create_accounts_receivable_entry($record->val('call_id'), $record->val('customer_id'), $cs_total, $record->val('customer_po'));
 
-		//If no errors with creating AR entry, add total to customer balance & call slip total (for billing purposes).
+		//If no errors with creating AR entry, create AR account entries, and add total to customer balance & call slip total (for billing purposes).
 		if($new_ar_id > 0){
+			//Pull AR Default Accounts record
+			$default_accounts = df_get_record("_account_defaults",array("default_id"=>1));
+		
+			//Save Account Records
+			require_once('tables/accounts_receivable_voucher_accounts/accounts_receivable_voucher_accounts.php');
+			if($record->val('type') == "TM"){ //For TM
+				$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_labor"), $cs_labor_total);
+				$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_materials"), $cs_inventory_total+$cs_po_total+$cs_materials_total+$cs_consumables_total);
+				$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_fuel"), $cs_fuel_total);
+			}
+			else //For PM/Quoted - ***total minus tax (unsure if this is how it should be or not)***
+				$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_pm"), $cs_total-$cs_tax_total);
+
+			//Add tax record
+			$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_tax"), $cs_tax_total);
+			
 			$customer_record = df_get_record('customers',array('customer_id'=>$record->val('customer_id'))); //Get Customer Record
 			if(isset($customer_record)){
 				$customer_balance = $customer_record->val('balance'); //Get current customer balance
@@ -859,10 +887,20 @@ class tables_call_slips {
 		//--Normally, we would use ->delete(true), which checks permissions, but b/c AR entries have delete disallowed, we have to do it w/o a permission check.
 		//--So, just in case, something awkward happens, check to make sure the AR entry isn't Pending / Posted before deleting.
 		if($ar_record->val('post_status') == null){
+			$voucher_id = $ar_record->val("voucher_id"); //Save Record ID - used to delete account records
+			
 			$res = $ar_record->delete(); //Delete w/o permission check.
 
 			if ( PEAR::isError($res) ){
 				return -3; //Error deleting the AR Record
+			}
+			
+			$ar_account_records = df_get_records_array("accounts_receivable_voucher_accounts",array("voucher_id"=>$voucher_id));
+			foreach($ar_account_records as $ar_account_record){
+				$res = $ar_account_record->delete(); //Delete w/o permission check.
+				if ( PEAR::isError($res) ){
+					return -7; //Error deleting an AR Account Record (This shouldn't happen... in theory. Shouldn't cause any major issues, but will leave unused data in the database)
+				}
 			}
 		}
 		else
@@ -1270,6 +1308,7 @@ class tables_call_slips {
 			//Misc
 			$total += $record->val('charge_consumables');
 			$total += $record->val('charge_fuel');
+			$total += $record->val('tax');
 
 			//Hours
 			$employeeRecords = $record->getRelatedRecords('time_logs');
