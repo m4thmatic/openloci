@@ -67,6 +67,39 @@ class tables_customers {
 			'order' => 1
 		);
 	}	
+
+	function section__billing_defaults(&$record){
+		$childString = "";
+		
+		//Billing Defaults
+			$childString .= '<table class="view_contacts"><tr>
+								<th>Type</th>
+								<th>Amount</th>
+								<th>Account</th>
+							</tr>';
+
+			//Get records array instead of using relationship b/c we can use "->display()"
+			$billingRecords = df_get_records_array("customer_billing",array("customer_id"=>$record->val("customer_id")));
+			foreach ($billingRecords as $billingRecord){
+				$childString .= '<tr><td>' . $billingRecord->display('type') .
+								'</td><td>' . $billingRecord->val('amount') .
+								"</td><td>" . $billingRecord->display('account') .
+								"</td></tr>";
+			}
+		
+			$childString .= '</table><br>';
+		
+		
+		
+		
+		return array(
+			'content' => "$childString",
+			'class' => 'main',
+			'label' => 'Call Slip Billing Defaults',
+			'order' => 10
+		);
+	}	
+
 	
 	function block__after_markup_widget(){
 		//Create a hidden field to determine if we are going to auto-generate a site on save.
