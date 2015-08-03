@@ -275,7 +275,6 @@ class tables_call_slips {
 
 	$childString = "";
 
-	
 		//Hours Worked
 			$childString .= '<b><u>Hours</u></b><br><br>';
 			$childString .= '<table class="view_add"><tr>
@@ -550,8 +549,13 @@ class tables_call_slips {
 			//If the button in the 'Change Status' section has been pressed.
 			//Because both the $_GET and $query will be "" on a new record, check to insure that they are not empty.
 			if(($_GET['-status_change'] == $query['-recordid']) && ($query['-recordid'] != "")){
-				$status_button = $_GET['status_button'];
 
+				//Start Transaction - on error, rollback changes.
+				xf_db_query("BEGIN TRANSACTION",df_db());
+				xf_db_query("SET autocommit = 0",df_db()); //Normally shouldn't have to set this explicitly, but is required in this instance. Not entirely sure why, but I think it may have to do with saving records in functions that are being called from another class - separate transaction?
+				$error = false;
+
+				$status_button = $_GET['status_button'];
 				switch($status_button){
 					case("Void Call Slip"): //Pressed: Void Call Slip
 						$record->setValue('status',"VOID"); //Set status to Complete.
@@ -565,16 +569,18 @@ class tables_call_slips {
 						break;
 					case("Create Billing"): //Pressed: Create Billing
 						$billing_id = $this->create_billing($record); //Create Billing.
-						if($billing_id != -1){ //Check for errors with saving AR entry
+						if($billing_id > 0){ //Check for errors with saving AR entry
 							$record->setValue('ar_billing_id',$billing_id);  //Set Status to Billing Pending & the associated AR entry.
 							$record->setValue('status',"BPD");
-							if($billing_id < 0) //Check for other errors
-								$status_msg .= 'WARNING: Billing Entry has been Created, However, the Customer Balance could not be Updated. Manual Correction may be needed. (ERROR ' . $billing_id . ')';
-							else
+						//	if($billing_id < 0) //Check for other errors
+						//		$status_msg .= 'WARNING: Billing Entry has been Created, However, the Customer Balance could not be Updated. Manual Correction may be needed. (ERROR ' . $billing_id . ')';
+						//	else
 								$status_msg = 'Billing Entry has been Created.';
 						}
-						else
+						else{
 							$status_msg = 'An error occured while trying to Create a Billing Entry. You may not have the proper permissions. (ERROR '. $billing_id .')';
+							$error = true;
+						}
 						break;
 					case("Recall Billing"): //Pressed: Recall Billing (formerly "Unbill")
 						$unbill = $this->unbill_cs($record); //Create a Credit Call Slip, and Reverse the billing entry on this one in Accounts Receivable.
@@ -583,33 +589,44 @@ class tables_call_slips {
 							$record->setValue('ar_billing_id',null);
 							$status_msg = "Billing Entry has been removed.";
 						}
-						else
+						else{
 							$status_msg = 'An error occured while trying to Unbill the Call Slip. You may not have the proper Accounts Receivable permissions. (ERROR '. $unbill .')';
+							$error = true;
+						}
 						break;
 					case("Credit Invoice"): //Pressed: Credit Invoice
 						$credit_call_id = $this->create_credit_cs($record); //Create a Credit Call Slip, and Reverse the billing entry on this one in Accounts Receivable.
-						$record->setValue('status',"CRD");
-						$record->setValue('credit',"Credited (Call ID " . $credit_call_id . ")");
-						$status_msg = "Call Slip has been Reversed, and a Credit Call Slip has been created.";
+						if($credit_call_id > 0){
+							$record->setValue('status',"CRD");
+							$record->setValue('credit',"Credited (Call ID " . $credit_call_id . ")");
+							$status_msg = "Call Slip has been Reversed, and a Credit Call Slip has been created.";
+						}
+						else{
+							$status_msg = 'An error occured while trying to create a Credit Invoice. You may not have the proper permissions. (ERROR '. $credit_call_id .')';
+							$error = true;
+						}
 						break;
 				}
 				
 				//Save record
 				$res = $record->save(null, true); //Save Record w/ permission check.
-				//$res = $record->save(); //Save Record w/o permission check. - Temporary quick fix, should modify permissions instead
-				
-				//Check for errors.
-				if ( PEAR::isError($res) ){
-					// An error occurred
-					//throw new Exception($res->getMessage());
-					$msg = '<input type="hidden" name="--error" value="Unable to change status. This is most likely because you do not have the required permissions.'.$status_msg.'">';
+
+				//Check for errors - If there is an error, rollback changes
+				if ( PEAR::isError($res) || $error == true){
+					$msg = '<input type="hidden" name="--error" value="Unable to change status. '.$status_msg.'">';
+
+					//Rollback Changes.
+					xf_db_query("ROLLBACK",df_db());
 				}
+				//Otherwise commit.
 				else {
-						$msg = '<input type="hidden" name="--msg" value="'.$status_msg.'">';
-					//else 
-					//	$msg = '<input type="hidden" name="--error" value="Something Broke: Status='.$record->val('status').'">';
+					$msg = '<input type="hidden" name="--msg" value="'.$status_msg.'">';
+
+					//Commit Changes
+					xf_db_query("COMMIT",df_db());
 				}
 
+				xf_db_query("SET autocommit = 1",df_db()); //Reset this back to normal.
 				
 				$childString .= '<form name="status_change">';
 				$childString .= '<input type="hidden" name="-table" value="'.$query['-table'].'">';
@@ -687,6 +704,10 @@ class tables_call_slips {
 	//Function to create a billing entry based on the call slip - returns the id of the billing record
 	//On error: (-1) Error with creating AR entry, (-2) Error saving the customer balance, (-3) Error loading customer record.
 	function create_billing($record){
+		//Check to insure the record exists
+		if($record == null)
+			return -8; //Record is null
+
 		//Check AR permissions....
 		//.....
 		
@@ -829,17 +850,26 @@ class tables_call_slips {
 		
 			//Save Account Records
 			require_once('tables/accounts_receivable_voucher_accounts/accounts_receivable_voucher_accounts.php');
+			$new_arv_id = array();
 			if($record->val('type') == "TM"){ //For TM
-				$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_labor"), $cs_labor_total);
-				$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_materials"), $cs_inventory_total+$cs_po_total+$cs_materials_total+$cs_consumables_total);
-				$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_fuel"), $cs_fuel_total);
+				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_labor"), $cs_labor_total);
+				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_materials"), $cs_inventory_total+$cs_po_total+$cs_materials_total+$cs_consumables_total);
+				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_fuel"), $cs_fuel_total);
 			}
 			else //For PM/Quoted - ***total minus tax (unsure if this is how it should be or not)***
-				$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_pm"), $cs_total-$cs_tax_total);
+				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_pm"), $cs_total-$cs_tax_total);
 
 			//Add tax record
-			$new_arv_id = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_tax"), $cs_tax_total);
+			$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_tax"), $cs_tax_total);
 			
+			//Check to insure all AR Account Records saved appropriately
+			foreach($new_arv_id as $arv_id){
+				if($arv_id < 0)
+					return -1;
+			}
+//This should be done at Post for Accts Recv
+/*
+			//Add balance to customer record
 			$customer_record = df_get_record('customers',array('customer_id'=>$record->val('customer_id'))); //Get Customer Record
 			if(isset($customer_record)){
 				$customer_balance = $customer_record->val('balance'); //Get current customer balance
@@ -853,6 +883,7 @@ class tables_call_slips {
 			}
 			else
 				return -3;
+*/
 		}
 		
 		return $new_ar_id;
@@ -861,18 +892,23 @@ class tables_call_slips {
 
 	//Function to unbill a call slip - returns 1 on success, -1 on error.
 	function unbill_cs($record){
+		//Check to insure the record exists
+		if($record == null)
+			return -8; //Record is null
+	
 		//Check AR permissions....
 		$AR_userperms = get_userPerms('accounts_receivable');
 		if($AR_userperms != "edit" && $AR_userperms != "post")
 			return -1;
 	
 		$ar_record = df_get_record('accounts_receivable',array('voucher_id'=>$record->val('ar_billing_id')));
-		$amount = $ar_record->val("amount");
 		
 		//Check to insure the records exists
 		if($ar_record == null)
 			return -5; //Record is null
 		
+		$amount = $ar_record->val("amount");
+
 		//Check for batch - if so, remove the entry from the batch
 		if($ar_record->val('batch_id') != null){
 			//Delete record in accounts_receivable_batch_vouchers
@@ -895,18 +931,20 @@ class tables_call_slips {
 				return -3; //Error deleting the AR Record
 			}
 			
+			//Delete all associated AR Account Records
 			$ar_account_records = df_get_records_array("accounts_receivable_voucher_accounts",array("voucher_id"=>$voucher_id));
 			foreach($ar_account_records as $ar_account_record){
 				$res = $ar_account_record->delete(); //Delete w/o permission check.
 				if ( PEAR::isError($res) ){
-					return -7; //Error deleting an AR Account Record (This shouldn't happen... in theory. Shouldn't cause any major issues, but will leave unused data in the database)
+					return -7; //Error deleting an AR Account Record
 				}
 			}
 		}
 		else
 			return -4; //Post Status is not null
 		
-		//Remove total from the customer balance & call slip billed.
+//This should be done at Post for Accts Recv
+/*		//Remove total from the customer balance & call slip billed.
 		$customer_record = df_get_record('customers',array('customer_id'=>$record->val('customer_id'))); //Get Customer Record
 		if(isset($customer_record)){
 			$customer_balance = $customer_record->val('balance'); //Get current customer balance
@@ -921,7 +959,7 @@ class tables_call_slips {
 		}
 		else
 			return -6;
-		
+*/		
 		
 		
 		return 1;

@@ -46,7 +46,7 @@ CREATE TABLE `_company_departments` (
   `department_id` int(11) NOT NULL AUTO_INCREMENT,
   `department_name` varchar(50) NOT NULL,
   PRIMARY KEY (`department_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -169,7 +169,7 @@ CREATE TABLE `_record_versioning` (
   `record_id` varchar(255) NOT NULL,
   `version` int(11) NOT NULL,
   PRIMARY KEY (`record_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -185,7 +185,7 @@ CREATE TABLE `_record_versioning__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`record_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=402 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=402 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -222,7 +222,7 @@ CREATE TABLE `_system_users` (
   `print_checks` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `UserName` (`username`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -266,7 +266,7 @@ CREATE TABLE `_system_users__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`user_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -294,7 +294,7 @@ CREATE TABLE `accounts_payable` (
   `account_debit` int(11) DEFAULT NULL,
   `credit` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`voucher_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -339,7 +339,7 @@ CREATE TABLE `accounts_receivable` (
   `post_status` varchar(10) DEFAULT NULL,
   `post_date` date DEFAULT NULL,
   PRIMARY KEY (`voucher_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -365,7 +365,7 @@ CREATE TABLE `accounts_receivable__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`voucher_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=53 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -412,7 +412,7 @@ CREATE TABLE `accounts_receivable_voucher_accounts` (
   `account_id` int(10) NOT NULL,
   `amount` decimal(10,2) NOT NULL,
   PRIMARY KEY (`arva_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -430,7 +430,7 @@ CREATE TABLE `accounts_receivable_voucher_accounts__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`arva_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -439,7 +439,7 @@ CREATE TABLE `admin_county_tax` (
   `county` varchar(99) DEFAULT NULL,
   `tax_rate` decimal(3,3) DEFAULT NULL,
   PRIMARY KEY (`county_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -452,7 +452,7 @@ CREATE TABLE `billing` (
   `hours` decimal(6,2) NOT NULL,
   `notes` text NOT NULL,
   PRIMARY KEY (`billing_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -486,7 +486,7 @@ CREATE TABLE `call_slip_inventory` (
   `sale_price` decimal(11,2) DEFAULT NULL,
   `location` varchar(10) NOT NULL,
   PRIMARY KEY (`csi_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=46 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -507,7 +507,7 @@ CREATE TABLE `call_slip_inventory__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`csi_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=56 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
@@ -575,7 +575,7 @@ CREATE TABLE `call_slips` (
   `credit` varchar(30) DEFAULT NULL,
   `ar_billing_id` int(10) DEFAULT NULL,
   PRIMARY KEY (`call_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=81 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -614,7 +614,7 @@ CREATE TABLE `call_slips__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`call_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=243 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=263 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -629,7 +629,7 @@ CREATE TABLE `chart_of_accounts` (
   `account_description` text,
   PRIMARY KEY (`account_id`),
   UNIQUE KEY `account_number` (`account_number`)
-) ENGINE=MyISAM AUTO_INCREMENT=45 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -659,7 +659,7 @@ CREATE TABLE `contracts` (
   `billing_cycle` varchar(120) DEFAULT NULL,
   `instructions` text,
   PRIMARY KEY (`contract_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -708,7 +708,7 @@ CREATE TABLE `customer_contacts` (
   `contact_email` varchar(200) DEFAULT NULL,
   `contact_title` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`contact_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -716,7 +716,7 @@ CREATE TABLE `customer_markup` (
   `markup_id` int(11) NOT NULL AUTO_INCREMENT,
   `markup_label` varchar(100) NOT NULL,
   PRIMARY KEY (`markup_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -727,7 +727,7 @@ CREATE TABLE `customer_markup_rates` (
   `to` decimal(11,2) DEFAULT NULL,
   `markup_percent` decimal(6,5) NOT NULL,
   PRIMARY KEY (`markup_rate_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -739,7 +739,7 @@ CREATE TABLE `customer_site_contacts` (
   `contact_email` varchar(200) DEFAULT NULL,
   `contact_title` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`contact_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -755,7 +755,7 @@ CREATE TABLE `customer_sites` (
   `site_fax` varchar(20) DEFAULT NULL,
   `site_instructions` text,
   PRIMARY KEY (`site_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -779,7 +779,7 @@ CREATE TABLE `customer_sites__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`site_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -799,7 +799,7 @@ CREATE TABLE `customers` (
   `balance` decimal(20,2) NOT NULL DEFAULT '0.00',
   `details` text,
   PRIMARY KEY (`customer_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=620 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=620 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -827,14 +827,14 @@ CREATE TABLE `customers__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`customer_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=43 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dashboard` (
   `dashboard_id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`dashboard_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -844,7 +844,7 @@ CREATE TABLE `dataface__datagrids` (
   `gridData` text,
   `tableName` varchar(64) NOT NULL,
   PRIMARY KEY (`gridID`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -854,7 +854,7 @@ CREATE TABLE `dataface__failed_logins` (
   `username` varchar(32) NOT NULL,
   `time_of_attempt` int(11) NOT NULL,
   PRIMARY KEY (`attempt_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -874,7 +874,7 @@ CREATE TABLE `dataface__htmlreports_reports` (
   `date_created` datetime DEFAULT NULL,
   `last_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`report_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -882,7 +882,7 @@ CREATE TABLE `dataface__modules` (
   `module_name` varchar(255) NOT NULL,
   `module_version` int(11) DEFAULT NULL,
   PRIMARY KEY (`module_name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -890,7 +890,7 @@ CREATE TABLE `dataface__mtimes` (
   `name` varchar(255) NOT NULL,
   `mtime` int(11) DEFAULT NULL,
   PRIMARY KEY (`name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -905,7 +905,7 @@ CREATE TABLE `dataface__preferences` (
   KEY `username` (`username`),
   KEY `table` (`table`),
   KEY `record_id` (`record_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -914,13 +914,13 @@ CREATE TABLE `dataface__record_mtimes` (
   `recordid` varchar(255) NOT NULL,
   `mtime` int(11) NOT NULL,
   PRIMARY KEY (`recordhash`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dataface__version` (
   `version` int(5) NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
@@ -979,7 +979,7 @@ CREATE TABLE `employee_work_history` (
   `start` datetime NOT NULL,
   `end` datetime NOT NULL,
   PRIMARY KEY (`employee_work_history_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1020,7 +1020,7 @@ CREATE TABLE `employees` (
   `active` varchar(3) NOT NULL,
   `timeclock_pw` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`employee_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1069,7 +1069,7 @@ CREATE TABLE `employees__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`employee_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1110,7 +1110,7 @@ CREATE TABLE `general_ledger` (
   `post_status` varchar(10) DEFAULT NULL,
   `post_date` date DEFAULT NULL,
   PRIMARY KEY (`ledger_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=62 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1122,7 +1122,7 @@ CREATE TABLE `general_ledger_journal` (
   `debit` decimal(11,2) DEFAULT NULL,
   `credit` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`journal_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=228 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1133,7 +1133,7 @@ CREATE TABLE `general_ledger_recurring` (
   `recurring_ledger_run_date` varchar(20) NOT NULL,
   `recurring_ledger_description` text,
   PRIMARY KEY (`recurring_ledger_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1144,7 +1144,7 @@ CREATE TABLE `general_ledger_recurring_journal` (
   `debit` decimal(11,2) DEFAULT NULL,
   `credit` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`recurring_journal_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1152,7 +1152,7 @@ CREATE TABLE `general_ledger_status` (
   `status_id` int(11) NOT NULL,
   `closed_months` date NOT NULL,
   PRIMARY KEY (`status_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1168,7 +1168,7 @@ CREATE TABLE `inventory` (
   `quantity` decimal(15,4) DEFAULT NULL,
   `category` int(11) DEFAULT NULL,
   PRIMARY KEY (`inventory_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=74 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1192,7 +1192,7 @@ CREATE TABLE `inventory__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`inventory_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1200,7 +1200,7 @@ CREATE TABLE `inventory_category` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
   `category` varchar(100) NOT NULL,
   PRIMARY KEY (`category_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1222,7 +1222,7 @@ CREATE TABLE `inventory_purchase_history` (
   `purchase_price` decimal(11,2) NOT NULL,
   `quantity_purchased` decimal(15,4) NOT NULL,
   PRIMARY KEY (`inventory_purchase_history_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1243,7 +1243,7 @@ CREATE TABLE `inventory_purchase_history__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`inventory_purchase_history_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1251,7 +1251,7 @@ CREATE TABLE `locations` (
   `location_id` varchar(10) NOT NULL,
   `location` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`location_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
@@ -1481,7 +1481,7 @@ CREATE TABLE `purchase_order_inventory` (
   `total` decimal(11,2) DEFAULT NULL,
   `assigned_voucher_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`purchase_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=40 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1508,7 +1508,7 @@ CREATE TABLE `purchase_order_inventory__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`purchase_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1520,7 +1520,7 @@ CREATE TABLE `purchase_order_inventory_items` (
   `quantity_received` decimal(15,4) DEFAULT NULL,
   `purchase_price` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`list_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1540,7 +1540,7 @@ CREATE TABLE `purchase_order_inventory_items__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`list_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1558,7 +1558,7 @@ CREATE TABLE `purchase_order_office` (
   `total` decimal(11,2) DEFAULT NULL,
   `assigned_voucher_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`purchase_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1570,7 +1570,7 @@ CREATE TABLE `purchase_order_office_items` (
   `quantity_received` decimal(15,4) DEFAULT NULL,
   `purchase_price` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`list_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1590,7 +1590,7 @@ CREATE TABLE `purchase_order_service` (
   `total` decimal(11,2) DEFAULT NULL,
   `assigned_voucher_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`purchase_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1618,7 +1618,7 @@ CREATE TABLE `purchase_order_service__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`purchase_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1632,7 +1632,7 @@ CREATE TABLE `purchase_order_service_items` (
   `purchase_price` decimal(11,2) DEFAULT NULL,
   `sale_price` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`list_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1655,7 +1655,7 @@ CREATE TABLE `purchase_order_service_items__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`list_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=173 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=209 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1674,7 +1674,7 @@ CREATE TABLE `purchase_order_tool` (
   `total` decimal(11,2) DEFAULT NULL,
   `assigned_voucher_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`purchase_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1701,7 +1701,7 @@ CREATE TABLE `purchase_order_tool__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`purchase_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1713,7 +1713,7 @@ CREATE TABLE `purchase_order_tool_items` (
   `quantity_received` decimal(15,4) DEFAULT NULL,
   `purchase_price` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`list_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1734,7 +1734,7 @@ CREATE TABLE `purchase_order_vehicle` (
   `old_mileage` decimal(7,0) DEFAULT NULL,
   `new_mileage` decimal(7,0) DEFAULT NULL,
   PRIMARY KEY (`purchase_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1763,7 +1763,7 @@ CREATE TABLE `purchase_order_vehicle__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`purchase_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1801,7 +1801,7 @@ CREATE TABLE `purchase_order_vehicle_items` (
   `quantity_received` decimal(15,4) DEFAULT NULL,
   `purchase_price` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`list_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1818,7 +1818,7 @@ CREATE TABLE `rates` (
   `supr_ot` decimal(6,2) NOT NULL,
   `supr_tt` decimal(6,2) NOT NULL,
   PRIMARY KEY (`rate_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1834,7 +1834,7 @@ CREATE TABLE `time_logs` (
   `rate_per_hour` decimal(6,2) DEFAULT NULL,
   `status` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`log_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1848,7 +1848,7 @@ CREATE TABLE `tool_inventory` (
   `location` varchar(50) DEFAULT NULL,
   `category` int(11) DEFAULT NULL,
   PRIMARY KEY (`tool_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1870,7 +1870,7 @@ CREATE TABLE `tool_inventory__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`tool_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1878,7 +1878,7 @@ CREATE TABLE `tool_inventory_category` (
   `category_id` int(11) NOT NULL AUTO_INCREMENT,
   `category` varchar(100) NOT NULL,
   PRIMARY KEY (`category_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1886,7 +1886,7 @@ CREATE TABLE `tool_inventory_locations` (
   `location_id` int(11) NOT NULL AUTO_INCREMENT,
   `location` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`location_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1899,7 +1899,7 @@ CREATE TABLE `tool_inventory_purchase_history` (
   `purchase_price` decimal(11,2) NOT NULL,
   `quantity_purchased` decimal(15,4) NOT NULL,
   PRIMARY KEY (`tool_purchase_history_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1920,7 +1920,7 @@ CREATE TABLE `tool_inventory_purchase_history__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`tool_purchase_history_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2198,7 +2198,7 @@ CREATE TABLE `vendor_contacts` (
   `contact_email` varchar(200) DEFAULT NULL,
   `contact_title` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`contact_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2206,7 +2206,7 @@ CREATE TABLE `vendor_industry` (
   `vendor_industry_id` int(11) NOT NULL AUTO_INCREMENT,
   `vendor_industry` varchar(50) NOT NULL,
   PRIMARY KEY (`vendor_industry_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2240,7 +2240,7 @@ CREATE TABLE `vendors` (
   `default_account` int(11) DEFAULT NULL,
   `details` text,
   PRIMARY KEY (`vendor_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2282,7 +2282,7 @@ CREATE TABLE `vendors__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`vendor_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50001 DROP TABLE IF EXISTS `accounts_payable_unassigned_purchase_orders`*/;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
