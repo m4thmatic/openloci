@@ -1,0 +1,139 @@
+{use_macro file="Dataface_Main_Template.html"}
+	{fill_slot name="main_column"}
+
+{$test}
+		<script type="text/javascript">
+			{literal}
+			function toggle_all(form, toggle) {
+				var myForm = document.forms[form];
+				for( var i=0; i < myForm.length; i++ ) { 
+					if(toggle) {
+						myForm.elements[i].checked = "checked";
+					}
+					else {
+						myForm.elements[i].checked = "";
+					}
+				}
+			}
+			
+			function confirm_submit(form,el) {
+				if(confirm("Are you sure?"))
+					document.forms[form].elements[el].value = "yes";
+				else
+					document.forms[form].elements[el].value = "no";
+			}
+			{/literal}
+			</script>
+	
+		<h1>Post Accounts Receivable Entries</h1>
+		
+		{if $confirm == "true"}
+			<p class="portalMessage">The following accounts receivable entries have been posted. <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
+			
+			<table class="listing resultList">
+				<tr>
+					<th>ID</th>
+					<th>Date</th>
+					<th>Customer</th>
+					<th>Amount</th>
+				</tr>
+				{$i = 0}
+				{foreach from=$headers item=list}
+					{if $list.posted == "true"}
+						{if $i%2 == 0}
+							<tr class="listing odd">
+						{else}
+							<tr class="listing even">
+						{/if}
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.id}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.date}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.amount}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.customer}</a></td>
+						</tr>
+						{assign var="i" value=$i+1}
+					{/if}
+				{/foreach}
+			</table>
+			
+			{if $display_errors == "true"}
+				<p class="portalErrorMessage">The following accounts receivable entries failed to be posted.</p>
+				
+				<table class="listing resultList">
+					<tr>
+						<th>ID</th>
+						<th>Date</th>
+						<th>Customer</th>
+						<th>Amount</th>
+						<th>Error Message</th>
+					</tr>
+					{$i = 0}
+					{foreach from=$headers item=list}
+						{if $list.posted == "fail"}
+							{if $i%2 == 0}
+								<tr class="listing odd">
+							{else}
+								<tr class="listing even">
+							{/if}
+								<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.id}</a></td>
+								<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.date}</a></td>
+								<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.amount}</a></td>
+								<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.customer}</a></td>
+								<td valign="top">{$list.error_msg}</td>
+							</tr>
+							{assign var="i" value=$i+1}
+						{/if}
+					{/foreach}
+				</table>
+			{/if}
+
+		{elseif $headers}
+			<p>Select the following accounts receivable entries to be posted:</p>
+
+			<!--form name="select_post" onSubmit='confirm_submit("select_post","confirm_post")'-->
+			<form name="select_post">
+				<input type="hidden" name="-action" value="accounts_receivable_post">
+				<input type="hidden" name="confirm_post" value="true">
+							
+				<table class="listing resultList">
+					<tr>
+						<th><input type="checkbox" checked onchange=toggle_all("select_post",this.checked)></th>
+					<th>ID</th>
+					<th>Date</th>
+					<th>Customer</th>
+					<th>Invoice ID</th>
+					<!--th>Invoice Date</th-->
+					<th>Credit Invoice ID</th>
+					<th>Receivables Account</th>
+					<th>Amount</th>
+					<th>Revenue Accounts</th>
+					<th>Amount</th>
+					</tr>
+					{$i = 0}
+					{foreach from=$headers item=list}
+						{if $i%2 == 0}
+							<tr class="listing odd">
+						{else}
+							<tr class="listing even">
+						{/if}
+							<td><input type="checkbox" checked name="{$list.id}"></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.id}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.date}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.customer}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.invoice}</a></td>
+							<!--td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.invoice_date}</a></td-->
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.credit}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.rec_acct}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.rec_amount}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.rev_accts}</a></td>
+							<td valign="top"><a href="index.php?-table=accounts_receivable&-action=browse&-recordid=accounts_receivable?voucher_id={$list.id}">{$list.rev_amounts}</a></td>
+						</tr>
+						{assign var="i" value=$i+1}
+					{/foreach}
+				</table>
+				<input type="submit" value="Post">
+			</form>
+		{else}
+			<p class="portalMessage">There are currently no accounts receivable entries ready for posting. <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
+		{/if}
+	{/fill_slot}
+{/use_macro}

@@ -867,6 +867,11 @@ class tables_call_slips {
 				if($arv_id < 0)
 					return -1;
 			}
+			
+			//Set the total charge for the CS.
+			$record->setValue('total_charge',$cs_total);
+			$res = $record->save(null, true); //Save balance, with permission check
+
 //This should be done at Post for Accts Recv
 /*
 			//Add balance to customer record
@@ -878,8 +883,6 @@ class tables_call_slips {
 				if ( PEAR::isError($res) )
 					return -2;
 					
-				$record->setValue('total_charge',$cs_total);
-				$res = $record->save(null, true); //Save balance, with permission check
 			}
 			else
 				return -3;
@@ -942,6 +945,11 @@ class tables_call_slips {
 		}
 		else
 			return -4; //Post Status is not null
+		
+		
+		//Set the total charge for the CS back to 0.
+		$record->setValue('total_charge',0);
+		$res = $record->save(null, true); //Save balance, with permission check
 		
 //This should be done at Post for Accts Recv
 /*		//Remove total from the customer balance & call slip billed.
