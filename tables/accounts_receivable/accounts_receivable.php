@@ -13,21 +13,49 @@ class tables_accounts_receivable {
 				return Dataface_PermissionsTool::getRolePermissions("READ ONLY"); //Assign Read Only Permissions
 			elseif($userperms == "edit" || $userperms == "post"){
 				//Check status, determine if record should be uneditable.
-				if ( isset($record) && $record->val('post_status') == 'Posted')
-						return Dataface_PermissionsTool::getRolePermissions('NO_EDIT_DELETE');
+			//	if ( isset($record) && $record->val('post_status') == 'Posted')
+			//			return Dataface_PermissionsTool::getRolePermissions('NO_EDIT_DELETE');
 
-				//return Dataface_PermissionsTool::getRolePermissions(myRole()); //Assign Permissions based on user Role (typically USER)
 				$perms = Dataface_PermissionsTool::getRolePermissions(myRole()); //Assign Permissions based on user Role (typically USER)
 					unset($perms['delete']);
 				return $perms;
 			}
 		}
-
+		
 		//Default: No Access
 		return Dataface_PermissionsTool::NO_ACCESS();
 	}
 
-
+	function __field__permissions($record){
+		if( isset($record) && $record->val('post_status') == 'Posted')
+			return array('edit'=>0);
+	}
+	
+	//Remove the "edit" tab, if applicable. --- Field permissions are set to 'edit'=>0 anyway, but since changing "status" required general edit access via getPermissions(), which then automatically shows the tab - this needs to be visually disabled.
+	function init(){
+		$app =& Dataface_Application::getInstance();
+		$query =& $app->getQuery();
+		$record =& $app->getRecord();
+			
+		//Only on the 'view' page. Otherwise, causes issues with looking at the entire table (i.e. user sees a blank page).
+		//If record exists & the status is set such that the record shouldn't be editable.
+		//Make sure table is "accounts_receivable" otherwise screws up other tables that call accounts_receivable.
+		if($query['-action'] == 'view' && $query['-table'] == 'accounts_receivable')
+				if($record->val('post_status') == 'Posted')
+					echo "<style>#record-tabs-edit{display: none;}</style>";
+		}
+		
+		function post_status__permissions(&$record){
+			//Check permissions & if allowed, set edit permissions for "account_status"
+			if(get_userPerms('accounts_receivable') == "edit" || get_userPerms('accounts_receivable') == "post")
+				return array("edit"=>1);
+		}
+	
+		function credit_invoice_id__permissions(&$record){
+			//Check permissions & if allowed, set edit permissions for "account_status"
+			if(get_userPerms('accounts_receivable') == "edit" || get_userPerms('accounts_receivable') == "post")
+				return array("edit"=>1);
+		}
 	
 	function getTitle(&$record){
 		return "Accounts Receivable Entry for Voucher " . $record->val('voucher_id');

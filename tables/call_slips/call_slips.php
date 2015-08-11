@@ -98,6 +98,11 @@ class tables_call_slips {
 				return array("edit"=>1);
 		}
 
+		function total_charge__permissions(&$record){
+			//Check permissions & if allowed, set edit permissions for "account_status"
+			if(get_userPerms('call_slips') == "edit" || get_userPerms('call_slips') == "post")
+				return array("edit"=>1);
+		}
 
 		function rel_call_slip_purchase_orders__permissions(&$record){
 			return array(
@@ -248,6 +253,14 @@ class tables_call_slips {
 			//Return the type as per the list.
 			return $list[$record->val('type')];
 		}
+	
+		/*function credit__display(&$record){
+			if($record->val("credit") != null)
+				return "Credit CS " . $record->val("credit");
+			
+			return "";
+		}
+		*/
 
 		//Display datetime format as: "Month Day, Year - Hour(12):Minutes AM/PM" or "Month Year" for PMs
 		function call_datetime__display($record) {
@@ -598,7 +611,7 @@ class tables_call_slips {
 						$credit_call_id = $this->create_credit_cs($record); //Create a Credit Call Slip, and Reverse the billing entry on this one in Accounts Receivable.
 						if($credit_call_id > 0){
 							$record->setValue('status',"CRD");
-							$record->setValue('credit',"Credited (Call ID " . $credit_call_id . ")");
+							$record->setValue('credit',$credit_call_id);
 							$status_msg = "Call Slip has been Reversed, and a Credit Call Slip has been created.";
 						}
 						else{
@@ -872,21 +885,6 @@ class tables_call_slips {
 			$record->setValue('total_charge',$cs_total);
 			$res = $record->save(null, true); //Save balance, with permission check
 
-//This should be done at Post for Accts Recv
-/*
-			//Add balance to customer record
-			$customer_record = df_get_record('customers',array('customer_id'=>$record->val('customer_id'))); //Get Customer Record
-			if(isset($customer_record)){
-				$customer_balance = $customer_record->val('balance'); //Get current customer balance
-				$customer_record->setValue('balance',$customer_balance+$cs_total); //Add call slip total to balance
-				$res = $customer_record->save(null, true); //Save balance, with permission check
-				if ( PEAR::isError($res) )
-					return -2;
-					
-			}
-			else
-				return -3;
-*/
 		}
 		
 		return $new_ar_id;
@@ -946,35 +944,13 @@ class tables_call_slips {
 		else
 			return -4; //Post Status is not null
 		
-		
-		//Set the total charge for the CS back to 0.
-		$record->setValue('total_charge',0);
-		$res = $record->save(null, true); //Save balance, with permission check
-		
-//This should be done at Post for Accts Recv
-/*		//Remove total from the customer balance & call slip billed.
-		$customer_record = df_get_record('customers',array('customer_id'=>$record->val('customer_id'))); //Get Customer Record
-		if(isset($customer_record)){
-			$customer_balance = $customer_record->val('balance'); //Get current customer balance
-			$customer_record->setValue('balance',$customer_balance-$amount); //Add call slip total to balance
-			$res = $customer_record->save(null, true); //Save balance, with permission check
-			if ( PEAR::isError($res) )
-				return -5;
-				
-			$record->setValue('total_charge',0);
-			$res = $record->save(null, true); //Save balance, with permission check
-
-		}
-		else
-			return -6;
-*/		
-		
-		
 		return 1;
 	}
 	
-	//Function to create a credit call slip - returns call_id of new credit call_slip, -1 on error.
+	//Function to create a credit call slip - returns call_id of new credit call_slip, negative on error.
 	function create_credit_cs($record){
+		
+		//Create New Call Slip (Credit)
 		$new_cs_record = new Dataface_Record('call_slips', array());
 
 		//Create a array from the current record values.
@@ -992,24 +968,75 @@ class tables_call_slips {
 		}
 		$new_cs_record->setValue('type','CR');
 		$new_cs_record->setValue('status','CMP');
-		$new_cs_record->setValue('credit','Credit for Call ID '.$record->val('call_id'));
+		//$new_cs_record->setValue('credit','Credit for Call ID '.$record->val('call_id'));
 		if($record->val('type') == "TM"){ //If type if 'Time & Materials', calculate total
 			$cs_inv_total = (float) str_replace(',', '', $this->field__invoice_total($record)); //Remove comma, and cast as float. (Output from function is in number_format form)
 			$new_cs_record->setValue('quoted_cost',$cs_inv_total);
 		}
 		
-		//$res = $record->save();   // Doesn't check permissions
+		//Save new CS record
 		$res = $new_cs_record->save(null, true);  // checks permissions
 
+		//Check for error saving new CS record
 		if ( PEAR::isError($res) ){
-			// An error occurred
 			return -1;
-			throw new Exception($res->getMessage());
 		}
-		
 
+		//Add new Credit CS ID to the Accounts Receivable record
+		$ARrecord = df_get_record("accounts_receivable",array("voucher_id"=>$record->val("ar_billing_id")));
+		if(isset($ARrecord)){
+			$ARrecord->setValue("credit_invoice_id",$new_cs_record->val('call_id'));
+			$res = $ARrecord->save(null,true); //Save AR record
+			
+			//Check for error saving AR record
+			if ( PEAR::isError($res) )
+				return -3;
+		}
+		else
+			return -2;
+		
+		//Create General Ledger Entry to reverse the posted AR entry
+		//	- credit asset account (accts recv)
+		//	- debit others
+		$AR_account_records = df_get_records_array('accounts_receivable_voucher_accounts', array("voucher_id"=>$ARrecord->val('voucher_id')));
+		$journal_entry[] = array("account_number"=>$ARrecord->val('account'),"credit"=>$ARrecord->val('amount'));
+		foreach($AR_account_records as $AR_account_record){
+			$journal_entry[] = array("account_number"=>$AR_account_record->val("account_id"),"debit"=>$AR_account_record->val("amount"));
+		}
+		$description = "Accounts Receivable - Reversing Entry, Voucher ID: " . $ARrecord->val('voucher_id');
+		$res = create_general_ledger_entry($journal_entry, $description);
+
+		//Check for errors in creating the General Ledger entry
+		if($res < 0){
+			return -4;
+		}
+
+		//Remove total from the customer balance & call slip billed.
+		$customer_record = df_get_record('customers',array('customer_id'=>$record->val('customer_id'))); //Get Customer Record
+		if(isset($customer_record)){
+			$customer_balance = $customer_record->val('balance'); //Get current customer balance
+			$customer_record->setValue('balance',$customer_balance - $record->val("total_charge")); //Subtract what was charged from customer balance
+			$res = $customer_record->save(null, true); //Save balance, with permission check
+			
+			//Check for error saving Customer Record
+			if ( PEAR::isError($res) )
+				return -5;
+				
+			//Set the total charge for the current CS back to 0.
+			$record->setValue('total_charge',0);
+			$res = $record->save(null, true); //Save balance, with permission check
+
+			//Check for error saving current CS record
+			if ( PEAR::isError($res) )
+				return -6;
+		}
+		else
+			return -7;
+
+
+		/*	--No longer do this... a credit CS just gets saved as type "CR" which is basically the same as "quoted".
 		//Get & parse through call slip inventory records
-	/*	$csi_records = df_get_records_array('call_slip_inventory',array('call_id'=>$record->val('call_id')));
+		$csi_records = df_get_records_array('call_slip_inventory',array('call_id'=>$record->val('call_id')));
 		foreach($csi_records as $csi_record){
 			//Create new call slip inventory entries
 			$new_csi_record = new Dataface_Record('call_slip_inventory', array());
@@ -1063,7 +1090,8 @@ class tables_call_slips {
 				throw new Exception($res->getMessage());
 			}
 		}
-	*/
+		*/
+		
 		return $new_cs_record->val('call_id');
 	}
 	

@@ -45,10 +45,10 @@ class actions_accounts_receivable_post {
 				$headers[$i]['date'] = $ARrecord->strval('voucher_date');//$rdate['month'].'-'.$rdate['day'].'-'.$rdate['year'];
 				$headers[$i]['customer'] = $ARrecord->display('customer_id');
 				$headers[$i]['invoice'] = $ARrecord->display('invoice_id');
+				//$headers[$i]['credit'] = $ARrecord->display('credit_invoice_id');
 
 				//Get more detailed header info
 				//$headers[$i]['invoice_date'] = "";
-				$headers[$i]['credit'] = $ARrecord->display('credit_invoice_id');
 				$headers[$i]['rec_acct'] = $ARrecord->display('account');
 				$headers[$i]['rec_amount'] = $ARrecord->display('amount');
 				$headers[$i]['rev_accts'] = "";
@@ -72,6 +72,7 @@ class actions_accounts_receivable_post {
 				$headers[$i]['date'] = $ARrecord->strval('voucher_date');//$rdate['month'].'-'.$rdate['day'].'-'.$rdate['year'];
 				$headers[$i]['customer'] = $ARrecord->display('customer_id');
 				$headers[$i]['invoice'] = $ARrecord->display('invoice_id');
+				//$headers[$i]['credit'] = $ARrecord->display('credit_invoice_id');
 				
 				//Only modify selected records
 				if($_GET[$ARrecord->val('voucher_id')]=="on"){
@@ -83,8 +84,8 @@ class actions_accounts_receivable_post {
 
 					$ARrecord->setValue('post_status',"Posted"); //Set status to Posted.
 					$ARrecord->setValue('post_date',date('Y-m-d')); //Set post date.
-					$res = $ARrecord->save(); //Save Record w/o permission check.
-					//$res = $record->save(null, true); //Save Record w/ permission check.  ****Fix permissions in accounts_receivable.php to allow for this.
+					//$res = $ARrecord->save(); //Save Record w/o permission check.
+					$res = $record->save(null, true); //Save Record w/ permission check.
 
 					//Check for errors.
 					if ( PEAR::isError($res) ){
@@ -108,9 +109,7 @@ class actions_accounts_receivable_post {
 						$headers[$i]['error_msg'] .= "Failed on: create General Ledger Entry. $res<br>";
 					}
 
-					/*
-					Call Slip - Status: Billed
-					*/
+					//Set Call Slip Status to "BLD" (Billed)
 					$CSrecord = df_get_record("call_slips",array("call_id"=>$ARrecord->val("invoice_id")));
 					if(isset($CSrecord)){
 						$CSrecord->setValue("status","BLD");
