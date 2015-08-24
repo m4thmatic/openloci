@@ -565,7 +565,7 @@ class tables_call_slips {
 
 				//Start Transaction - on error, rollback changes.
 				xf_db_query("BEGIN TRANSACTION",df_db());
-				xf_db_query("SET autocommit = 0",df_db()); //Normally shouldn't have to set this explicitly, but is required in this instance. Not entirely sure why, but I think it may have to do with saving records in functions that are being called from another class - separate transaction?
+				xf_db_query("SET autocommit = 0",df_db()); 
 				$error = false;
 
 				$status_button = $_GET['status_button'];
@@ -612,6 +612,7 @@ class tables_call_slips {
 						if($credit_call_id > 0){
 							$record->setValue('status',"CRD");
 							$record->setValue('credit',$credit_call_id);
+							$record->setValue('payment_status',"Voided");
 							$status_msg = "Call Slip has been Reversed, and a Credit Call Slip has been created.";
 						}
 						else{
@@ -967,6 +968,7 @@ class tables_call_slips {
 			//$ret .= $name . "=" . $value . " - ";
 		}
 		$new_cs_record->setValue('type','CR');
+		$new_cs_record->setValue('problem','CR');
 		$new_cs_record->setValue('status','CMP');
 		//$new_cs_record->setValue('credit','Credit for Call ID '.$record->val('call_id'));
 		if($record->val('type') == "TM"){ //If type if 'Time & Materials', calculate total
@@ -1224,6 +1226,13 @@ class tables_call_slips {
 		//********************END Inventory Management Code********************
 		//*********************************************************************
 
+		//Technician Assignment
+		if($record->val("technician") == null){
+			$cust_site_record = df_get_record("customer_sites",array("site_id"=>$record->val("site_id")));
+			$record->setValue("technician",$cust_site_record->val("technician"));
+		}
+		
+		
 		//For Testing Purposes: Insure nothing gets saved.
 		//return PEAR::raiseError("FIN",DATAFACE_E_NOTICE);
 	}

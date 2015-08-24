@@ -109,6 +109,25 @@ function url_data($url){
 }
 
 
+//Transaction Functions
+
+function df_transaction_begin(){ //Begin Transaction
+	xf_db_query("BEGIN TRANSACTION",df_db()); //BEGIN
+	xf_db_query("SET autocommit = 0",df_db()); //Set Autocommit to OFF -- Normally shouldn't have to set this explicitly, but it seems to be required for Xataface.
+}
+function df_transaction_commit(){ //Commit Transaction
+	xf_db_query("COMMIT",df_db()); //COMMIT
+	xf_db_query("SET autocommit = 1",df_db()); //Set Autocommit back to ON
+}
+function df_transaction_rollback(){ //Rollback Transaction
+	xf_db_query("ROLLBACK",df_db()); //ROLLBACK
+	xf_db_query("SET autocommit = 1",df_db()); //Set Autocommit back to ON
+}
+
+
+
+
+
 //Create General Ledger & Associated Journal Entries
 //Return: 1 == success, -1 == record not created (permission error), -2 == malformed $journal_entry_array, -3 == partial entry created
 function create_general_ledger_entry($journal_entry_array, $description = null){

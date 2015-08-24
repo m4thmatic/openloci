@@ -109,10 +109,11 @@ class actions_accounts_receivable_post {
 						$headers[$i]['error_msg'] .= "Failed on: create General Ledger Entry. $res<br>";
 					}
 
-					//Set Call Slip Status to "BLD" (Billed)
+					//Set Call Slip Status to "BLD" (Billed) & Payment Status to "Unbilled"
 					$CSrecord = df_get_record("call_slips",array("call_id"=>$ARrecord->val("invoice_id")));
 					if(isset($CSrecord)){
 						$CSrecord->setValue("status","BLD");
+						$CSrecord->setValue("status","Unbilled");
 						$res = $CSrecord->save(null,true);
 
 						//Check for errors.

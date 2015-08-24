@@ -43,22 +43,28 @@ class tables_accounts_receivable {
 		if($query['-action'] == 'view' && $query['-table'] == 'accounts_receivable')
 				if($record->val('post_status') == 'Posted')
 					echo "<style>#record-tabs-edit{display: none;}</style>";
-		}
+	}
 		
-		function post_status__permissions(&$record){
-			//Check permissions & if allowed, set edit permissions for "account_status"
-			if(get_userPerms('accounts_receivable') == "edit" || get_userPerms('accounts_receivable') == "post")
-				return array("edit"=>1);
-		}
+	function post_status__permissions(&$record){
+		//Check permissions & if allowed, set edit permissions for "account_status"
+		if(get_userPerms('accounts_receivable') == "edit" || get_userPerms('accounts_receivable') == "post")
+			return array("edit"=>1);
+	}
 	
-		function credit_invoice_id__permissions(&$record){
+	function credit_invoice_id__permissions(&$record){
+		//Check permissions & if allowed, set edit permissions for "account_status"
+		if(get_userPerms('accounts_receivable') == "edit" || get_userPerms('accounts_receivable') == "post")
+			return array("edit"=>1);
+	}
+	
+	function check_id__permissions(&$record){
 			//Check permissions & if allowed, set edit permissions for "account_status"
 			if(get_userPerms('accounts_receivable') == "edit" || get_userPerms('accounts_receivable') == "post")
 				return array("edit"=>1);
-		}
+	}
 	
 	function getTitle(&$record){
-		return "Accounts Receivable Entry for Voucher " . $record->val('voucher_id');
+		return "Accounts Receivable for Invoice " . $record->val('invoice_id') . " (" . $record->display("customer_id") . ")";
 		//$po_type = substr($record->val('purchase_order_id'),0,1);
 		//return 'Voucher ID #' . $record->val('voucher_id') . " (" . $record->strval('voucher_date') . ") - Type: " . $po_type . ", Invoice ID: " . $record->val('invoice_id');
 
