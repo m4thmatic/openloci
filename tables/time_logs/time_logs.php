@@ -22,7 +22,7 @@ class tables_time_logs {
 		return Dataface_PermissionsTool::NO_ACCESS();
 	}	
 	
-	
+/*	
 	function block__after_custom_rph_widget(){
 		$app =& Dataface_Application::getInstance();
 		$record =& $app->getRecord();
@@ -41,6 +41,7 @@ class tables_time_logs {
 			
 		}
 	}
+*/
 		
 	function rate_type__validate(&$record, $value, &$params){
 		if(is_array($value))
@@ -57,7 +58,7 @@ class tables_time_logs {
 		if($this->rate_type == 'custom')
 			$record->setValue('rate_per_hour', $record->val('custom_rph'));
 		elseif($this->rate_type != ''){
-			$call_rec = df_get_record('call_slips', array('call_id'=>$record->val('category')));
+			$call_rec = df_get_record('call_slips', array('call_id'=>$record->val('callslip_id')));
 			$cust_rec = df_get_record('customers', array('customer_id'=>$call_rec->val('customer_id')));
 			$rate_rec = df_get_record('rates', array('rate_id'=>$cust_rec->val('rate')));
 			

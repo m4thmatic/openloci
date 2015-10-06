@@ -46,21 +46,28 @@ class actions_dashboard {
 			}
 
 			if($dashboard_display_info['accounts_payable'] == "post"){
-				$status = df_get_records_array('accounts_payable', array('post_status'=>'Pending', 'batch_id'=>'='));
+				$status = df_get_records_array('accounts_payable', array('post_status'=>'Pending'));
 				$dashboard_display_info['payable_pending'] = count($status);
 				
-				$status = df_get_records_array('accounts_payable_batch', array('post_status'=>'='));
-				$dashboard_display_info['payable_pending_batches'] = count($status);
+			//	$status = df_get_records_array('accounts_payable_batch', array('post_status'=>'='));
+			//	$dashboard_display_info['payable_pending_batches'] = count($status);
 			}
 			
 			if($dashboard_display_info['accounts_receivable'] == "post"){
-				$status = df_get_records_array('accounts_receivable', array('post_status'=>'Pending', 'batch_id'=>'='));
+				$status = df_get_records_array('accounts_receivable', array('post_status'=>'Pending'));
 				$dashboard_display_info['receivable_pending'] = count($status);
 				
-				$status = df_get_records_array('accounts_receivable_batch', array('post_status'=>'='));
-				$dashboard_display_info['receivable_pending_batches'] = count($status);
+			//	$status = df_get_records_array('accounts_receivable_batch', array('post_status'=>'='));
+			//	$dashboard_display_info['receivable_pending_batches'] = count($status);
 			}
 
+			if($dashboard_display_info['cash_receipts'] == "post"){
+				$status = df_get_records_array('cash_receipts_checks', array('post_status'=>'Pending', 'batch_id'=>'='));
+				$dashboard_display_info['receipts_pending'] = count($status);
+				
+				//$status = df_get_records_array('cash_receipts_batch', array('post_status'=>'='));
+				//$dashboard_display_info['receipts_pending_batches'] = count($status);
+			}
 
 		//Display Dashboard
 		df_display($dashboard_display_info, 'dashboard.html');

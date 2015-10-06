@@ -1,17 +1,11 @@
 <?php //Main Application access point
 
 //Default Sort Orders
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'employees' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'last_name, first_name'; }
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'customers' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'customer'; }
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'customer_sites' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'customer_id, site_address'; }
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'call_slips' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'call_id desc'; }
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'purchase_orders' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'purchase_id desc'; }
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'chart_of_accounts' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'account_number'; }
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'general_ledger' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'ledger_id desc'; }
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'payroll_period' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'payroll_period_id desc'; }
-	if ( !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == 'accounts_receivable' ){ $_REQUEST['-sort'] = $_GET['-sort'] = 'voucher_id desc'; }
+$sort_order = parse_ini_file("conf/sort_order_defaults.ini");
 
-
+if ( isset($sort_order[@$_REQUEST['-table']]) and !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == @$_REQUEST['-table'] ){
+	$_REQUEST['-sort'] = $_GET['-sort'] = $sort_order[@$_REQUEST['-table']];
+}
 		
 //require_once "../xataface-rc2.0.3/dataface-public-api.php";
 //df_init(__FILE__, "../xataface-rc2.0.3");
@@ -44,6 +38,12 @@ function userID(){
 	$auth =& Dataface_AuthenticationTool::getInstance();
 	$user =& $auth->getLoggedInUser();
 	return $user->val('user_id'); 
+}
+
+function userName(){
+	$auth =& Dataface_AuthenticationTool::getInstance();
+	$user =& $auth->getLoggedInUser();
+	return $user->val('username'); 
 }
 
 function get_userPerms($perm){

@@ -25,14 +25,17 @@ class tables_cash_receipts_checks {
 		foreach ($invoice_records as $invoice_record){
 			$ar_record = df_get_record("accounts_receivable",array("voucher_id"=>$invoice_record["ar_voucher_id"]));
 			
-			if($invoice_record["amount"] != $ar_record->val("amount")){
-				$color = 'style="color:red"';
+			if($invoice_record["amount"] > $ar_record->val("amount")){
+				$background = 'style="background-color: lightgreen"';
+			}
+			elseif($invoice_record["amount"] < $ar_record->val("amount")){
+				$background = 'style="background-color: #ff7070"';
 			}
 			
-			$childString .= '<tr><td>' . $invoice_record["ar_voucher_id"] .
-							'</td><td>' . $ar_record->display("invoice_id") .
-							'</td><td><span '.$color.'>$' . $invoice_record["amount"] . '</span>' .
-							'</td><td><span '.$color.'>$' . $ar_record->val("amount") . '</span>' .
+			$childString .= '<tr><td '.$background.'>' . $invoice_record["ar_voucher_id"] .
+							'</td><td '.$background.'>' . $ar_record->display("invoice_id") .
+							'</td><td '.$background.'>$' . $invoice_record["amount"] . '</span>' .
+							'</td><td '.$background.'>$' . $ar_record->val("amount") . '</span>' .
 							"</td></tr>";
 		}
 

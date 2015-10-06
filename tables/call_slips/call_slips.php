@@ -78,6 +78,7 @@ class tables_call_slips {
 			//}
 			//else
 			//	$_SESSION["log_data"] = "";
+		
 		}
 		
 		function status__permissions(&$record){
@@ -86,6 +87,12 @@ class tables_call_slips {
 				return array("edit"=>1);
 		}
 		
+		function payment_status__permissions(&$record){
+			//Check permissions & if allowed, set edit permissions for "account_status"
+			if(get_userPerms('call_slips') == "edit" || get_userPerms('call_slips') == "post")
+				return array("edit"=>1);
+		}
+
 		function ar_billing_id__permissions(&$record){
 			//Check permissions & if allowed, set edit permissions for "account_status"
 			if(get_userPerms('call_slips') == "edit" || get_userPerms('call_slips') == "post")
@@ -280,8 +287,6 @@ class tables_call_slips {
 		function block__before_additional_materials_widget() { echo '<div style="width: 600px">'; }
 		function block__after_additional_materials_widget() { echo "</div>"; }
 		
-		
-
 
 	//Add attitional details to the view tab
 	function section__billing(&$record){
@@ -564,8 +569,7 @@ class tables_call_slips {
 			if(($_GET['-status_change'] == $query['-recordid']) && ($query['-recordid'] != "")){
 
 				//Start Transaction - on error, rollback changes.
-				xf_db_query("BEGIN TRANSACTION",df_db());
-				xf_db_query("SET autocommit = 0",df_db()); 
+				df_transaction_begin();
 				$error = false;
 
 				$status_button = $_GET['status_button'];
@@ -599,11 +603,12 @@ class tables_call_slips {
 						$unbill = $this->unbill_cs($record); //Create a Credit Call Slip, and Reverse the billing entry on this one in Accounts Receivable.
 						if($unbill == 1){
 							$record->setValue('status',"CMP");
+							$record->setValue('total_charge',0);
 							$record->setValue('ar_billing_id',null);
 							$status_msg = "Billing Entry has been removed.";
 						}
 						else{
-							$status_msg = 'An error occured while trying to Unbill the Call Slip. You may not have the proper Accounts Receivable permissions. (ERROR '. $unbill .')';
+							$status_msg = 'An error occured while trying to Unbill the Call Slip. You may not have the proper Accounts Receivable permissions, or the Receivables entry may already be Pending. (ERROR '. $unbill .')';
 							$error = true;
 						}
 						break;
@@ -630,17 +635,15 @@ class tables_call_slips {
 					$msg = '<input type="hidden" name="--error" value="Unable to change status. '.$status_msg.'">';
 
 					//Rollback Changes.
-					xf_db_query("ROLLBACK",df_db());
+					df_transaction_rollback();
 				}
 				//Otherwise commit.
 				else {
 					$msg = '<input type="hidden" name="--msg" value="'.$status_msg.'">';
 
 					//Commit Changes
-					xf_db_query("COMMIT",df_db());
+					df_transaction_commit();
 				}
-
-				xf_db_query("SET autocommit = 1",df_db()); //Reset this back to normal.
 				
 				$childString .= '<form name="status_change">';
 				$childString .= '<input type="hidden" name="-table" value="'.$query['-table'].'">';
@@ -691,7 +694,7 @@ class tables_call_slips {
 				
 				//Status: Billing Pending
 				elseif($record->val('status') == "BPD"){
-					$childString .= '<input type="submit" name="status_button" value="Recall Billing"> (This will remove the associated Accounts Payable Entry)';
+					$childString .= '<input type="submit" name="status_button" value="Recall Billing"> (This will remove the associated Billing Entry)';
 				}
 				
 				//Status: Billed
@@ -742,7 +745,7 @@ class tables_call_slips {
 				$rate = $rate_record->val($cs_tl['rate_type']);
 				
 				//$cs_total += $rate * $hours;
-				$cs_labor_total = $rate * $hours;
+				$cs_labor_total += $rate * $hours;
 			}
 				
 			//Collect Billing Details for Inventory Items
@@ -857,7 +860,7 @@ class tables_call_slips {
 		require_once('tables/accounts_receivable/accounts_receivable.php');
 		$new_ar_id = tables_accounts_receivable::create_accounts_receivable_entry($record->val('call_id'), $record->val('customer_id'), $cs_total, $record->val('customer_po'));
 
-		//If no errors with creating AR entry, create AR account entries, and add total to customer balance & call slip total (for billing purposes).
+		//If no errors with creating AR entry, create AR account entries, and add total to call slip total (for billing purposes).
 		if($new_ar_id > 0){
 			//Pull AR Default Accounts record
 			$default_accounts = df_get_record("_account_defaults",array("default_id"=>1));
@@ -912,18 +915,18 @@ class tables_call_slips {
 		$amount = $ar_record->val("amount");
 
 		//Check for batch - if so, remove the entry from the batch
-		if($ar_record->val('batch_id') != null){
-			//Delete record in accounts_receivable_batch_vouchers
-			$ar_batch_record = df_get_record('accounts_receivable_batch_vouchers',array('voucher_id'=>$record->val('ar_billing_id')));
-			$res = $ar_batch_record->delete(true);
-		}
-		if ( PEAR::isError($res) ){
-			return -2; //Error deleting the AR Batch Entry
-		}
+		//if($ar_record->val('batch_id') != null){
+		//	//Delete record in accounts_receivable_batch_vouchers
+		//	$ar_batch_record = df_get_record('accounts_receivable_batch_vouchers',array('voucher_id'=>$record->val('ar_billing_id')));
+		//	$res = $ar_batch_record->delete(true);
+		//}
+		//if ( PEAR::isError($res) ){
+		//	return -2; //Error deleting the AR Batch Entry
+		//}
 		
 		//Delete the AR entry
 		//--Normally, we would use ->delete(true), which checks permissions, but b/c AR entries have delete disallowed, we have to do it w/o a permission check.
-		//--So, just in case, something awkward happens, check to make sure the AR entry isn't Pending / Posted before deleting.
+		//--So, just in case something awkward happens, check to make sure the AR entry isn't Pending / Posted before deleting.
 		if($ar_record->val('post_status') == null){
 			$voucher_id = $ar_record->val("voucher_id"); //Save Record ID - used to delete account records
 			

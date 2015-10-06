@@ -324,11 +324,11 @@
 					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_payable_batch"> View / Edit Accounts Payable Batches</a>
 					</li>
-					<li><img src="{$ENV.DATAFACE_URL}/images/topic_icon.gif"/>
+					<!--li><img src="{$ENV.DATAFACE_URL}/images/topic_icon.gif"/>
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=accounts_payable_batch_post"> Post Accounts Payable [Batches]</a> (Pending: {$payable_pending_batches})
-					</li>
+					</li-->
 					<li><img src="{$ENV.DATAFACE_URL}/images/topic_icon.gif"/>
-						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=accounts_payable_post"> Post Accounts Payable [Not assigned to a batch] </a>(Pending: {$payable_pending})
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=accounts_payable_post"> Post Accounts Payable</a> (Pending: {$payable_pending})
 					</li>
 				</ul>
 			{/if}
@@ -340,12 +340,18 @@
 					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_receivable"> View Accounts Receivable</a>
 					</li>
+					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_receivable_batch"> View Accounts Receivable Batches</a>
+					</li>
 				</ul>
 			{elseif $accounts_receivable == "edit"}
 				<br><b>ACCOUNTS RECEIVABLE</b><br>
 				<ul>
 					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_receivable"> View / Edit Accounts Receivable</a>
+					</li>
+					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_receivable_batch"> View Accounts Receivable Batches</a>
 					</li>
 				</ul>
 			{elseif $accounts_receivable == "post"}
@@ -354,18 +360,48 @@
 					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_receivable"> View / Edit Accounts Receivable</a>
 					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
-						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_receivable_batch"> View / Edit Accounts Receivable Batches</a>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=accounts_receivable_batch"> View Accounts Receivable Batches</a>
 					</li>
-					<li><img src="{$ENV.DATAFACE_URL}/images/topic_icon.gif"/>
+					<!--li><img src="{$ENV.DATAFACE_URL}/images/topic_icon.gif"/>
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=accounts_receivable_batch_post"> Post Accounts Receivable [Batches]</a> (Pending: {$receivable_pending_batches})
-					</li>
+					</li-->
 					<li><img src="{$ENV.DATAFACE_URL}/images/topic_icon.gif"/>
-						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=accounts_receivable_post"> Post Accounts Receivable [Not assigned to a batch] </a>(Pending: {$receivable_pending})
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=accounts_receivable_post"> Post Accounts Receivable</a> (Pending: {$receivable_pending})
 					</li>				</ul>
 			{/if}
 
 
+			{if $cash_receipts == "view"}
+				<br><b>CASH RECEIPTS</b><br>
+				<ul>
+					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=cash_receipts_checks"> View Cash Receipts</a>
+					</li>
+				</ul>
+			{elseif $cash_receipts == "edit"}
+				<br><b>CASH RECEIPTS</b><br>
+				<ul>
+					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=cash_receipts_checks"> View / Edit Cash Receipts</a>
+					</li>
+				</ul>
+			{elseif $cash_receipts == "post"}
+				<br><b>CASH RECEIPTS</b><br>
+				<ul>
+					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=cash_receipts_checks"> View / Edit Cash Receipts</a>
+					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=cash_receipts_batch"> View / Edit Cash Receipts Batches</a>
+					</li>
+					<!--li><img src="{$ENV.DATAFACE_URL}/images/topic_icon.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=cash_receipts_batch_post"> Post Cash Receipts [Batches]</a> (Pending: {$receipts_pending_batches})
+					</li-->
+					<li><img src="{$ENV.DATAFACE_URL}/images/topic_icon.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=cash_receipts_post"> Post Cash Receipts </a>(Pending: {$receipts_pending})
+					</li>				</ul>
+			{/if}
 
+			
 
 			{if 0} 
 			----------------------------------------------------------------------------------------------------

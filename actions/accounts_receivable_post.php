@@ -14,112 +14,147 @@ class actions_accounts_receivable_post {
 		//If the page has been submitted (Post button pressed), this will be "true", otherwise NULL.
 		$confirm = isset($_GET['confirm_post']) ? $_GET['confirm_post'] : null;
 
-		//Get the application instance - used for pulling the query data
-		$app =& Dataface_Application::getInstance();
-
-		//Extend the limit of df_get_records_array past the usual first 30 records, and query the records where [post_status == "Pending"]
-		$query =& $app->getQuery();
-		$query['-skip'] = 0;
-		$query['-limit'] = ""; //******I think this will do *all*, but need to double check********
-		$query['post_status'] = 'Pending';
-		$query['batch_id'] = '=';
-			
-		//Pull all records with Pending status
-		$ARrecords = df_get_records_array('accounts_receivable', $query);
-
-		//Unset the 'post_status' query
-		unset($query['post_status']);
 		
 		//Set Headers as an empty array
 		$headers = array();
-		
-		$display_errors = false;
+
+		//Clear Error Flags
+		//$display_errors = false;
+		$error = false;
 
 		//Initial Page Load - Post button has not pressed.
 		if($confirm == null){
-			//Run through all pulled records
+			//Get the application instance - used for pulling the query data
+			$app =& Dataface_Application::getInstance();
+			$query =& $app->getQuery();
+
+			//Extend the limit of df_get_records_array past the usual first 30 records, and query the records where [post_status == "Pending"] and [user_id == (current user)]
+			$query['-skip'] = 0;
+			$query['-limit'] = ""; //******I think this will do *all*, but need to double check********
+			$query['post_status'] = 'Pending';
+			//$query['batch_id'] = '='; //This is from an old version where you would first assign receivables to batches.
+
+			//Determine if we are displaying only those billing entries created by the current user, or all.
+			if(!isset($_GET['all'])){
+				$query['user_id'] = userID();
+			}
+
+			//Pull all records with Pending status
+			$ARrecords = df_get_records_array('accounts_receivable', $query);
+
+			//Unset the 'post_status' query
+			unset($query['post_status']);
+
+			//Run through all pulled records to get header information
 			foreach($ARrecords as $i=>$ARrecord){
+				$headers[$i] = $this->getHeader($ARrecord);
+			}
+		}
+		//Review
+		elseif($confirm == "review"){
 
-				//Get basic header info
-				$headers[$i]['id'] = $ARrecord->val('voucher_id');
-				$headers[$i]['date'] = $ARrecord->strval('voucher_date');//$rdate['month'].'-'.$rdate['day'].'-'.$rdate['year'];
-				$headers[$i]['customer'] = $ARrecord->display('customer_id');
-				$headers[$i]['invoice'] = $ARrecord->display('invoice_id');
-				//$headers[$i]['credit'] = $ARrecord->display('credit_invoice_id');
+			//Check to make sure that entries have been selected
+			if(isset($_GET['select_entries'])){
+				//Get selected entries
+				$entries = $_GET['select_entries'];
 
-				//Get more detailed header info
-				//$headers[$i]['invoice_date'] = "";
-				$headers[$i]['rec_acct'] = $ARrecord->display('account');
-				$headers[$i]['rec_amount'] = $ARrecord->display('amount');
-				$headers[$i]['rev_accts'] = "";
-				$headers[$i]['rev_amounts'] = "";
+				//Run through all selected records
+				foreach($entries as $i=>$entry){
+					//Pull Associated Record
+					$ARrecord = df_get_record("accounts_receivable", array("voucher_id"=>$entry));
 					
-				//Get Account Records
-				$AR_account_records = df_get_records_array('accounts_receivable_voucher_accounts', array("voucher_id"=>$ARrecord->val('voucher_id')));
-				foreach($AR_account_records as $AR_account_record){
-					$headers[$i]['rev_accts'] .= $AR_account_record->display("account_id")."<br>";
-					$headers[$i]['rev_amounts'] .= $AR_account_record->display("amount")."<br>";
+					//Pull Header Information from Record
+					$headers[$i] = $this->getHeader($ARrecord);
 				}
 			}
 		}
-		else{ //Post
-				
-			//Run through all pulled records
-			foreach($ARrecords as $i=>$ARrecord){
+		//Post
+		elseif($confirm == "post"){
 			
-				//Get basic header info
-				$headers[$i]['id'] = $ARrecord->val('voucher_id');
-				$headers[$i]['date'] = $ARrecord->strval('voucher_date');//$rdate['month'].'-'.$rdate['day'].'-'.$rdate['year'];
-				$headers[$i]['customer'] = $ARrecord->display('customer_id');
-				$headers[$i]['invoice'] = $ARrecord->display('invoice_id');
-				//$headers[$i]['credit'] = $ARrecord->display('credit_invoice_id');
+			//Check to make sure that entries have been selected
+			if(isset($_GET['select_entries'])){
+				//Get the selected entries
+				$entries = $_GET['select_entries'];
+			
+				$journal_data = array();
+				$journal_entry = array();
+
+				//Start Transaction - on error, rollback changes.
+				df_transaction_begin();
 				
-				//Only modify selected records
-				if($_GET[$ARrecord->val('voucher_id')]=="on"){
+				//Create Batch
+				$batch_record = new Dataface_Record('accounts_receivable_batch', array());
+				$batch_record->setValues(array(
+					'batch_name'=>"AR ".date("Y-m-d")." (".userName().")",
+					'post_date'=>date("Y-m-d")
+				));
+				$res = $batch_record->save(null, true); //Save Record w/ permission check.
 
-					//Start Transaction - on error, rollback changes.
-					xf_db_query("BEGIN TRANSACTION",df_db());
-					xf_db_query("SET autocommit = 0",df_db()); //Normally shouldn't have to set this explicitly, but is required in this instance. Not entirely sure why, but I think it may have to do with saving records in functions that are being called from another class - separate transaction?
-					$error = false;
+				//Check for errors.
+				if ( PEAR::isError($res) ){
+					$error = true;
+					$headers[$i]['error_msg'] .= "Failed on: create Accounts Receivable Batch record. $res<br>";
+				}
 
-					$ARrecord->setValue('post_status',"Posted"); //Set status to Posted.
-					$ARrecord->setValue('post_date',date('Y-m-d')); //Set post date.
-					//$res = $ARrecord->save(); //Save Record w/o permission check.
-					$res = $record->save(null, true); //Save Record w/ permission check.
+				//Get Batch ID
+				$batch_id = $batch_record->val("batch_id");
+				
+				//Run through all pulled records
+				foreach($entries as $i=>$entry){
+					//Pull Associated Record
+					$ARrecord = df_get_record("accounts_receivable", array("voucher_id"=>$entry));
+					if(isset($ARrecord)){
+						//Pull Header Information from Record
+						$headers[$i] = $this->getHeader($ARrecord);
+						$headers[$i]['error_msg'] = "";
+
+						//Check to insure that the record has not already been posted.
+						if($ARrecord->val("post_status") == "Posted"){
+							$error = true;
+							$headers[$i]['error_msg'] .= "Failed on: Record has already been posted.";
+						}
+						
+						$ARrecord->setValue('post_status',"Posted"); //Set status to Posted.
+						$ARrecord->setValue('post_date',date('Y-m-d')); //Set post date.
+						$res = $ARrecord->save(null, true); //Save Record w/ permission check.
+
+						//Check for errors.
+						if ( PEAR::isError($res) ){
+							$error = true;
+							$headers[$i]['error_msg'] .= "Failed on: update Accounts Receivable record. $res<br>";
+						}
+					}
+					else{
+						$error = true;
+						$headers[$i]['error_msg'] .= "Failed on: get Accounts Receivable record.<br>";
+					}
+
+					//Add AR record to the batch record
+					//Create Batch Voucher Record
+					$batch_voucher_record = new Dataface_Record('accounts_receivable_batch_vouchers', array());
+					$batch_voucher_record->setValues(array(
+						'batch_id'=>$batch_id,
+						'voucher_id'=>$entry
+					));
+					$res = $batch_voucher_record->save(null, true); //Save Record w/ permission check.
 
 					//Check for errors.
 					if ( PEAR::isError($res) ){
 						$error = true;
-						$headers[$i]['error_msg'] .= "Failed on: update Accounts Receivable record.<br>";
-					}
-						
-					//Create General Ledger Entry
-					//	- debit asset account (accts recv)
-					//	- credit others
-					$AR_account_records = df_get_records_array('accounts_receivable_voucher_accounts', array("voucher_id"=>$ARrecord->val('voucher_id')));
-					$journal_entry[] = array("account_number"=>$ARrecord->val('account'),"debit"=>$ARrecord->val('amount'));
-					foreach($AR_account_records as $AR_account_record){
-						$journal_entry[] = array("account_number"=>$AR_account_record->val("account_id"),"credit"=>$AR_account_record->val("amount"));
-					}
-					$description = "Accounts Receivable Entry, Voucher ID: " . $ARrecord->val('voucher_id');
-					$res = create_general_ledger_entry($journal_entry, $description);
-
-					if($res < 0){
-						$error = true;
-						$headers[$i]['error_msg'] .= "Failed on: create General Ledger Entry. $res<br>";
-					}
-
-					//Set Call Slip Status to "BLD" (Billed) & Payment Status to "Unbilled"
+						$headers[$i]['error_msg'] .= "Failed on: create Accounts Receivable Batch Voucher record. $res<br>";
+					}					
+					
+					//Set Call Slip Status to "BLD" (Billed) & Payment Status to "Unpayed"
 					$CSrecord = df_get_record("call_slips",array("call_id"=>$ARrecord->val("invoice_id")));
 					if(isset($CSrecord)){
 						$CSrecord->setValue("status","BLD");
-						$CSrecord->setValue("status","Unbilled");
+						$CSrecord->setValue("payment_status","Unpayed");
 						$res = $CSrecord->save(null,true);
 
 						//Check for errors.
 						if ( PEAR::isError($res) ){
 							$error = true;
-							$headers[$i]['error_msg'] .= "Failed on: update Call Slip record.<br>";
+							$headers[$i]['error_msg'] .= "Failed on: update Call Slip record. $res<br>";
 						}
 					}
 					else{
@@ -133,48 +168,110 @@ class actions_accounts_receivable_post {
 						$customer_balance = $customer_record->val('balance'); //Get current customer balance
 						$customer_record->setValue('balance',$customer_balance + $ARrecord->val('amount')); //Add receivables total to balance
 						$res = $customer_record->save(null, true); //Save balance, with permission check
-						
+							
 						//Check for errors.
 						if ( PEAR::isError($res) ){
 							$error = true;
-							$headers[$i]['error_msg'] .= "Failed on: update Customer record.<br>";
+							$headers[$i]['error_msg'] .= "Failed on: update Customer record. $res<br>";
 						}
 					}
-					else{
+					else{ //Error
 						$error = true;
 						$headers[$i]['error_msg'] .= "Failed on: get Customer record.<br>";
 					}
-
-					if($error == true){
-						//Tag to denote which entries have failed.
-						$headers[$i]['posted'] = "fail";
-						$display_errors = true;
-						
-						//Rollback Changes
-						xf_db_query("ROLLBACK",df_db());
-
-					}
-					else{
-						//Tag to denote which entries have been posted.
-						$headers[$i]['posted'] = "true";
-						
-						//Commit Changes
-						xf_db_query("COMMIT",df_db());
-					}
 					
-					xf_db_query("SET autocommit = 1",df_db()); //Reset this back to normal.
-
-
+					//Collect & Parse General Ledger Information
+					//Debit asset account (accts recv)
+					if(isset($journal_data["debit"][$ARrecord->val('account')])){
+						$journal_data["debit"][$ARrecord->val('account')] += $ARrecord->val('amount');
+					}
+					else
+						$journal_data["debit"][$ARrecord->val('account')] = $ARrecord->val('amount');
+					//Credit others
+					$AR_account_records = df_get_records_array('accounts_receivable_voucher_accounts', array("voucher_id"=>$ARrecord->val('voucher_id')));
+					foreach($AR_account_records as $AR_account_record){
+						if(isset($journal_data["credit"][$AR_account_record->val("account_id")])){
+							$journal_data["credit"][$AR_account_record->val("account_id")] += $AR_account_record->val("amount");
+						}
+						else
+							$journal_data["credit"][$AR_account_record->val("account_id")] = $AR_account_record->val("amount");
+					}
 				}
-				
+
+				//Reframe General Ledger Information
+				foreach($journal_data["debit"] as $account => $amount){
+					$journal_entry[] = array("account_number"=>$account,"debit"=>$amount);
+				}
+				foreach($journal_data["credit"] as $account => $amount){
+					$journal_entry[] = array("account_number"=>$account,"credit"=>$amount);
+				}
+
+				//Create General Ledger Entry
+				$description = "Accounts Receivable Entry, Batch ID: " . $batch_id;
+				$res = create_general_ledger_entry($journal_entry, $description);
+
+				if($res < 0){
+					$error = true;
+					$headers[$i]['error_msg'] .= "Failed on: create General Ledger Entry. $res<br>";
+				}
+
+				//Check if there were errors
+				if($error == true){
+					//$display_errors = true;
+							
+					//Rollback Changes
+					df_transaction_rollback();
+				}
+				else{
+					//Commit Changes
+					df_transaction_commit();
+				}
 			}
+
+		}
+		else{
+			//Something went wrong...
 		}
 		
 
 		//Display the page
-		df_display(array("headers"=>$headers,"confirm"=>$confirm,"display_errors"=>$display_errors), 'accounts_receivable_post.html');
+		df_display(array("headers"=>$headers,"confirm"=>$confirm,"display_errors"=>$error), 'accounts_receivable_post.html');
 
 	}
+	
+	//Return "Header" Information
+	function getHeader($record, $partial_list = false){
+		
+		//Basic Information
+		$out['id'] = $record->val('voucher_id');
+		$out['date'] = $record->strval('voucher_date');//$rdate['month'].'-'.$rdate['day'].'-'.$rdate['year'];
+		$out['customer'] = $record->display('customer_id');
+		$out['invoice'] = $record->display('invoice_id');
+		$out['rec_acct'] = $record->display('account');
+		$out['rec_amount'] = $record->display('amount');
+
+		if($partial_list == false){
+			//Pull the CS record for the Customer Site information
+			$CSrecord = df_get_record('call_slips',array('call_id'=>$record->val('invoice_id')));
+			$site = $CSrecord->display("site_id");
+
+			$out['customer'] .= "<br><center>(" . $site . ")</center>";
+			
+			
+			//Get Account Records
+			$out['rev_accts'] = "";
+			$out['rev_amounts'] = "";
+			$account_records = df_get_records_array('accounts_receivable_voucher_accounts', array("voucher_id"=>$record->val('voucher_id')));
+			foreach($account_records as $account_record){
+				$out['rev_accts'] .= $account_record->display("account_id")."<br>";
+				$out['rev_amounts'] .= $account_record->display("amount")."<br>";
+			}
+		}
+		
+		return $out;
+	}
+	
+	
 }
 
 

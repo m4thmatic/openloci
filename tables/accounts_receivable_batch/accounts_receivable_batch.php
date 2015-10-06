@@ -46,7 +46,6 @@ class tables_accounts_receivable_batch {
 		$childString = "";	
 	
 		$voucherRecords = $record->getRelatedRecords('vouchers');
-
 		if($voucherRecords != null){
 			$childString .= '<table class="view_add"><tr>
 								<th>Voucher ID</th>
