@@ -37,6 +37,8 @@ CREATE TABLE `_account_defaults` (
   `ar_account_fuel` int(10) NOT NULL,
   `ar_account_tax` int(10) NOT NULL,
   `ar_account_pm` int(10) NOT NULL,
+  `ar_account_qu` int(10) NOT NULL,
+  `ar_account_cr` int(10) NOT NULL,
   `cash_receipts_account` int(10) NOT NULL,
   PRIMARY KEY (`default_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
@@ -186,7 +188,7 @@ CREATE TABLE `_record_versioning__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`record_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=454 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=462 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -371,7 +373,7 @@ CREATE TABLE `accounts_receivable__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`voucher_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=140 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=138 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -381,7 +383,7 @@ CREATE TABLE `accounts_receivable_batch` (
   `post_status` varchar(20) DEFAULT NULL,
   `post_date` date DEFAULT NULL,
   PRIMARY KEY (`batch_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -399,7 +401,7 @@ CREATE TABLE `accounts_receivable_batch__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`batch_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -408,7 +410,7 @@ CREATE TABLE `accounts_receivable_batch_vouchers` (
   `batch_id` int(10) NOT NULL,
   `voucher_id` int(10) NOT NULL,
   PRIMARY KEY (`arbv_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -425,7 +427,7 @@ CREATE TABLE `accounts_receivable_batch_vouchers__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`arbv_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -486,7 +488,7 @@ CREATE TABLE `call_slip_additional_materials` (
   `quantity` int(10) NOT NULL,
   `sale_price` decimal(11,2) NOT NULL,
   PRIMARY KEY (`list_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -596,8 +598,10 @@ CREATE TABLE `call_slips` (
   `total_charge` decimal(11,2) NOT NULL,
   `credit` int(11) DEFAULT NULL,
   `ar_billing_id` int(10) DEFAULT NULL,
+  `warranty_labor` enum('Charge','No Charge') NOT NULL DEFAULT 'Charge',
+  `warranty_materials` enum('Charge','No Charge') NOT NULL DEFAULT 'Charge',
   PRIMARY KEY (`call_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -634,10 +638,13 @@ CREATE TABLE `call_slips__history` (
   `total_charge` decimal(11,2) DEFAULT NULL,
   `tax` decimal(11,2) DEFAULT NULL,
   `payment_status` varchar(10) DEFAULT NULL,
+  `warranty_time` enum('Charge','No Charge') DEFAULT NULL,
+  `warranty_materials` enum('Charge','No Charge') DEFAULT NULL,
+  `warranty_labor` enum('Charge','No Charge') DEFAULT NULL,
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`call_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=321 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=335 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1122,6 +1129,8 @@ SET character_set_client = utf8;
  1 AS `total_charge`,
  1 AS `credit`,
  1 AS `ar_billing_id`,
+ 1 AS `warranty_labor`,
+ 1 AS `warranty_materials`,
  1 AS `search_field`*/;
 SET character_set_client = @saved_cs_client;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -1264,7 +1273,7 @@ CREATE TABLE `general_ledger` (
   `post_status` varchar(10) DEFAULT NULL,
   `post_date` date DEFAULT NULL,
   PRIMARY KEY (`ledger_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1283,7 +1292,7 @@ CREATE TABLE `general_ledger__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`ledger_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1295,7 +1304,7 @@ CREATE TABLE `general_ledger_journal` (
   `debit` decimal(11,2) DEFAULT NULL,
   `credit` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`journal_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=320 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=327 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1315,7 +1324,7 @@ CREATE TABLE `general_ledger_journal__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`journal_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2026,7 +2035,7 @@ CREATE TABLE `time_logs` (
   `rate_per_hour` decimal(6,2) DEFAULT NULL,
   `status` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2548,7 +2557,7 @@ CREATE TABLE `vendors__history` (
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `dataface__view_b8f350bcba1ab951a2db277006c85bfd` AS select `call_slips`.`call_id` AS `call_id`,`call_slips`.`customer_id` AS `customer_id`,`call_slips`.`site_id` AS `site_id`,`call_slips`.`status` AS `status`,`call_slips`.`payment_status` AS `payment_status`,`call_slips`.`quoted_cost` AS `quoted_cost`,`call_slips`.`contract_id` AS `contract_id`,`call_slips`.`type` AS `type`,`call_slips`.`work_order_number` AS `work_order_number`,`call_slips`.`po_number` AS `po_number`,`call_slips`.`customer_po` AS `customer_po`,`call_slips`.`problem` AS `problem`,`call_slips`.`call_instructions` AS `call_instructions`,`call_slips`.`call_datetime` AS `call_datetime`,`call_slips`.`site_instructions` AS `site_instructions`,`call_slips`.`technician` AS `technician`,`call_slips`.`scheduled_datetime` AS `scheduled_datetime`,`call_slips`.`desc_of_work` AS `desc_of_work`,`call_slips`.`completion_date` AS `completion_date`,`call_slips`.`charge_consumables` AS `charge_consumables`,`call_slips`.`charge_fuel` AS `charge_fuel`,`call_slips`.`tax` AS `tax`,`call_slips`.`total_charge` AS `total_charge`,`call_slips`.`credit` AS `credit`,`call_slips`.`ar_billing_id` AS `ar_billing_id`,concat(`call_slips`.`call_id`) AS `search_field` from `call_slips` */;
+/*!50001 VIEW `dataface__view_b8f350bcba1ab951a2db277006c85bfd` AS select `call_slips`.`call_id` AS `call_id`,`call_slips`.`customer_id` AS `customer_id`,`call_slips`.`site_id` AS `site_id`,`call_slips`.`status` AS `status`,`call_slips`.`payment_status` AS `payment_status`,`call_slips`.`quoted_cost` AS `quoted_cost`,`call_slips`.`contract_id` AS `contract_id`,`call_slips`.`type` AS `type`,`call_slips`.`work_order_number` AS `work_order_number`,`call_slips`.`po_number` AS `po_number`,`call_slips`.`customer_po` AS `customer_po`,`call_slips`.`problem` AS `problem`,`call_slips`.`call_instructions` AS `call_instructions`,`call_slips`.`call_datetime` AS `call_datetime`,`call_slips`.`site_instructions` AS `site_instructions`,`call_slips`.`technician` AS `technician`,`call_slips`.`scheduled_datetime` AS `scheduled_datetime`,`call_slips`.`desc_of_work` AS `desc_of_work`,`call_slips`.`completion_date` AS `completion_date`,`call_slips`.`charge_consumables` AS `charge_consumables`,`call_slips`.`charge_fuel` AS `charge_fuel`,`call_slips`.`tax` AS `tax`,`call_slips`.`total_charge` AS `total_charge`,`call_slips`.`credit` AS `credit`,`call_slips`.`ar_billing_id` AS `ar_billing_id`,`call_slips`.`warranty_labor` AS `warranty_labor`,`call_slips`.`warranty_materials` AS `warranty_materials`,concat(`call_slips`.`call_id`) AS `search_field` from `call_slips` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

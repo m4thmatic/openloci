@@ -248,7 +248,7 @@ class tables_call_slips {
 //			$list = $record->_table->_valuelistsConfig['type_list'];
 
 			//Add PM and CR to the list
-			$list["PM"]="Preventative Maintenance";
+			$list["PM"] = "Preventative Maintenance";
 			$list["CR"] = "Credit";
 
 			$list["TM"] = "Time & Material";
@@ -536,10 +536,18 @@ class tables_call_slips {
 			//Total
 			if($record->val('type') == "NC")
 				$total_charge_to_customer = "0.00 (No Charge)";
-			elseif($record->val('type') == "SW")
-				$total_charge_to_customer = "0.00 (Service Warranty)";
-			else
+			elseif($record->val('type') == "SW"){
+				$total_charge_to_customer  = 0.00;
+				if($record->val('warranty_labor') == "Charge")
+					$total_charge_to_customer += $total_hours_sale;
+				if($record->val('warranty_materials') == "Charge")
+					$total_charge_to_customer += $total_materials_sale;
+				$total_charge_to_customer = number_format($total_charge_to_customer+$record->val('charge_consumables')+$record->val('charge_fuel')+$record->val('tax'),2) . " (Service Warranty)";
+			}
+			elseif($record->val('type') == "TM")
 				$total_charge_to_customer = number_format($total_hours_sale+$total_materials_sale+$record->val('charge_consumables')+$record->val('charge_fuel')+$record->val('tax'),2);
+			else
+				$total_charge_to_customer = number_format($record->val('quoted_cost'),2) . " (Quoted)";
 				
 			$childString .= '<br><b>Total:</b> $<b>' . $total_charge_to_customer . '</b>';
 			$childString .= '<br><b>Total Billed:</b> $<b>' . $record->val('total_charge') . '</b>';
@@ -618,7 +626,7 @@ class tables_call_slips {
 							$record->setValue('status',"CRD");
 							$record->setValue('credit',$credit_call_id);
 							$record->setValue('payment_status',"Voided");
-							$status_msg = "Call Slip has been Reversed, and a Credit Call Slip has been created.";
+							$status_msg = "Call Slip has been Reversed, and a new \"Credit\" Cal; Slip (ID: ".$credit_call_id.") has been created.";
 						}
 						else{
 							$status_msg = 'An error occured while trying to create a Credit Invoice. You may not have the proper permissions. (ERROR '. $credit_call_id .')';
@@ -728,7 +736,8 @@ class tables_call_slips {
 		//Check AR permissions....
 		//.....
 		
-		if($record->val('type') == "TM"){
+		//If the Call Slip type is "Time & Material" or "Service Warranty" - Calculate & assign everything. Otherwise, use the "quoted cost"
+		if($record->val('type') == "TM" || $record->val("type") == "SW"){
 		
 			//$cs_total = 0;
 			
@@ -849,8 +858,17 @@ class tables_call_slips {
 			$cs_consumables_total = $record->val('charge_consumables');
 			$cs_fuel_total = $record->val('charge_fuel');
 			$cs_tax_total = $record->val('tax');
-			
-			$cs_total = $cs_labor_total + $cs_inventory_total + $cs_po_total + $cs_materials_total + $cs_consumables_total + $cs_fuel_total + $cs_tax_total;
+
+			if($record->val("type") == "SW"){
+				$cs_total  = 0.00;
+				if($record->val('warranty_labor') == "Charge")
+					$cs_total += $cs_labor_total;
+				if($record->val('warranty_materials') == "Charge")
+					$cs_total += $total_materials_sale + cs_po_total + cs_materials_total;
+				$cs_total = $cs_total+$record->val('charge_consumables')+$record->val('charge_fuel')+$record->val('tax');
+			}
+			else
+				$cs_total = $cs_labor_total + $cs_inventory_total + $cs_po_total + $cs_materials_total + $cs_consumables_total + $cs_fuel_total + $cs_tax_total;
 		}
 		else{
 			$cs_total = $record->val("quoted_cost");
@@ -868,13 +886,27 @@ class tables_call_slips {
 			//Save Account Records
 			require_once('tables/accounts_receivable_voucher_accounts/accounts_receivable_voucher_accounts.php');
 			$new_arv_id = array();
-			if($record->val('type') == "TM"){ //For TM
+			if($record->val('type') == "TM"){ //For Time & Material
 				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_labor"), $cs_labor_total);
 				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_materials"), $cs_inventory_total+$cs_po_total+$cs_materials_total+$cs_consumables_total);
 				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_fuel"), $cs_fuel_total);
 			}
-			else //For PM/Quoted - ***total minus tax (unsure if this is how it should be or not)***
-				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_pm"), $cs_total-$cs_tax_total);
+			elseif($record->val('type') == "SW"){ //For Service Warranty
+				if($record->val('warranty_labor') == "Charge")
+					$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_labor"), $cs_labor_total);
+				if($record->val('warranty_materials') == "Charge")
+					$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_materials"), $cs_inventory_total+$cs_po_total+$cs_materials_total+$cs_consumables_total);
+				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_fuel"), $cs_fuel_total);
+			}
+			elseif($record->val('type') == "QU") //For Quoted
+				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_qu"), $cs_total);
+			elseif($record->val('type') == "PM") //For Preventative Maintenance
+				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_pm"), $cs_total);
+			elseif($record->val('type') == "CR") //For Credit
+				$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_cr"), $cs_total);
+			else{ //For No Charge
+			
+			}
 
 			//Add tax record
 			$new_arv_id[] = tables_accounts_receivable_voucher_accounts::create_accounts_receivable_voucher_entry($new_ar_id, $default_accounts->val("ar_account_tax"), $cs_tax_total);
@@ -970,14 +1002,35 @@ class tables_call_slips {
 			$new_cs_record->setValue($name,$value);
 			//$ret .= $name . "=" . $value . " - ";
 		}
-		$new_cs_record->setValue('type','CR');
-		$new_cs_record->setValue('problem','CR');
-		$new_cs_record->setValue('status','CMP');
+
+		//Set Credit CS specific fields
+		$new_cs_record->setValue('type','CR'); //Type: Credit
+		$new_cs_record->setValue('problem','CR'); //Problem: Credit
+		$new_cs_record->setValue('desc_of_work',"Credit Call Slip for CallSlip ID: " . $record->val("call_id") . ".\n\n" . $record->val('desc_of_work')); //Description of Work: Append the CS to the beginning
+		$new_cs_record->setValue('status','CMP'); //Status: Complete
+		$new_cs_record->setValue('total_charge',0); //Total Charge: $0.00 (since not charged yet)
+		$new_cs_record->setValue('charge_consumables',0); //Consumables Charge: $0.00 (rolled into quoted total)
+		$new_cs_record->setValue('charge_fuel',0); //Fuel Charge: $0.00 (rolled into quoted total)
+		$new_cs_record->setValue('tax',0); //Tax: $0.00 (rolled into quoted total)
+		$new_cs_record->setValue('quoted_cost',$record->val('total_charge')); //"Quoted Cost": previous amount charged
+		
 		//$new_cs_record->setValue('credit','Credit for Call ID '.$record->val('call_id'));
+		/*
 		if($record->val('type') == "TM"){ //If type if 'Time & Materials', calculate total
 			$cs_inv_total = (float) str_replace(',', '', $this->field__invoice_total($record)); //Remove comma, and cast as float. (Output from function is in number_format form)
 			$new_cs_record->setValue('quoted_cost',$cs_inv_total);
 		}
+		if($record->val('type') == "SW"){ //If type if 'Service Warranty', calculate total
+			$cs_inv_total = 0;
+			if($record->val('warranty_labor') == "Charge")
+				$cs_inv_total += (float) str_replace(',', '', $this->field__time_log_total_total($record)); //Remove comma, and cast as float. (Output from function is in number_format form)
+			if($record->val('warranty_materials') == "Charge")
+				$cs_inv_total += (float) str_replace(',', '', $this->field__materials_total($record)); //Remove comma, and cast as float. (Output from function is in number_format form)
+			
+			$cs_inv_total = $cs_inv_total+$record->val('charge_consumables')+$record->val('charge_fuel')+$record->val('tax');
+			
+		}
+		*/
 		
 		//Save new CS record
 		$res = $new_cs_record->save(null, true);  // checks permissions
@@ -1241,13 +1294,15 @@ class tables_call_slips {
 	}
 
 	function beforeInsert(&$record){
-		//Copy "Site Instructions" from the Customer Site file.
-		$site_record = df_get_record('customer_sites', array('site_id'=>$record->val('site_id')));
-		$record->setValue('site_instructions', $site_record->val('site_instructions'));
+		if($record->val("type") != "CR"){ //If the record being inserted is a "Credit", don't to anything, otherwise:
+			//Copy "Site Instructions" from the Customer Site file.
+			$site_record = df_get_record('customer_sites', array('site_id'=>$record->val('site_id')));
+			$record->setValue('site_instructions', $site_record->val('site_instructions'));
 
-		//Set initial 'Status' and 'Call Date/Time'
-		$record->setValue('status','NCO');
-		$record->setValue('call_datetime',date('Y-m-d g:i a'));
+			//Set initial 'Status' and 'Call Date/Time'
+			$record->setValue('status','NCO');
+			$record->setValue('call_datetime',date('Y-m-d g:i a'));
+		}
 	}
 
 

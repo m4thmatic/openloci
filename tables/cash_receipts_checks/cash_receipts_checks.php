@@ -12,7 +12,7 @@ class tables_cash_receipts_checks {
 
 		$childString = "";
 
-		$childString .= '<b><u>Hours</u></b><br><br>';
+		//$childString .= '<b><u>Invoices</u></b><br><br>';
 		$childString .= '<table class="view_add"><tr>
 							<th>AR Voucher ID</th>
 							<th>Invoice ID</th>
