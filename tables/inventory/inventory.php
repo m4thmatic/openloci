@@ -92,6 +92,12 @@ class tables_inventory {
 	}
 */	
 
+	function status__display(&$record){
+		if($record->val("status") == "Active")
+			return "";
+		return $record->val("status");
+	}
+
 	function quantity__display(&$record){
 		$quantity = explode('.',$record->val('quantity'));
 		if($quantity[1] != 0)

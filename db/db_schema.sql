@@ -188,7 +188,7 @@ CREATE TABLE `_record_versioning__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`record_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=462 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=463 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -345,7 +345,7 @@ CREATE TABLE `accounts_receivable` (
   `check_id` int(10) DEFAULT NULL,
   `user_id` int(10) NOT NULL,
   PRIMARY KEY (`voucher_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -373,7 +373,7 @@ CREATE TABLE `accounts_receivable__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`voucher_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=138 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=139 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -437,7 +437,7 @@ CREATE TABLE `accounts_receivable_voucher_accounts` (
   `account_id` int(10) NOT NULL,
   `amount` decimal(10,2) NOT NULL,
   PRIMARY KEY (`arva_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -455,7 +455,7 @@ CREATE TABLE `accounts_receivable_voucher_accounts__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`arva_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -644,7 +644,7 @@ CREATE TABLE `call_slips__history` (
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`call_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=335 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=337 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1098,6 +1098,7 @@ SET character_set_client = utf8;
  1 AS `sale_overide`,
  1 AS `quantity`,
  1 AS `category`,
+ 1 AS `status`,
  1 AS `vehicle_quantity`,
  1 AS `stock_quantity`*/;
 SET character_set_client = @saved_cs_client;
@@ -1369,6 +1370,7 @@ CREATE TABLE `inventory` (
   `sale_overide` decimal(11,2) DEFAULT NULL,
   `quantity` decimal(15,4) DEFAULT NULL,
   `category` int(11) DEFAULT NULL,
+  `status` enum('Active','Decommissioned') DEFAULT 'Active',
   PRIMARY KEY (`inventory_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1391,10 +1393,11 @@ CREATE TABLE `inventory__history` (
   `average_purchase` decimal(11,2) DEFAULT NULL,
   `sale_method` varchar(20) DEFAULT NULL,
   `sale_overide` decimal(11,2) DEFAULT NULL,
+  `status` enum('InUse','Decommissioned') DEFAULT NULL,
   PRIMARY KEY (`history__id`),
   KEY `prikeys` (`inventory_id`) USING HASH,
   KEY `datekeys` (`history__modified`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -2544,7 +2547,7 @@ CREATE TABLE `vendors__history` (
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `dataface__view_a61fbcecd9051777794f538b7978fbac` AS select `inventory`.`inventory_id` AS `inventory_id`,`inventory`.`item_name` AS `item_name`,`inventory`.`item_description` AS `item_description`,`inventory`.`item_unit` AS `item_unit`,`inventory`.`last_purchase` AS `last_purchase`,`inventory`.`average_purchase` AS `average_purchase`,`inventory`.`sale_method` AS `sale_method`,`inventory`.`sale_overide` AS `sale_overide`,`inventory`.`quantity` AS `quantity`,`inventory`.`category` AS `category`,`inventory`.`quantity` AS `vehicle_quantity`,`inventory`.`quantity` AS `stock_quantity` from `inventory` */;
+/*!50001 VIEW `dataface__view_a61fbcecd9051777794f538b7978fbac` AS select `inventory`.`inventory_id` AS `inventory_id`,`inventory`.`item_name` AS `item_name`,`inventory`.`item_description` AS `item_description`,`inventory`.`item_unit` AS `item_unit`,`inventory`.`last_purchase` AS `last_purchase`,`inventory`.`average_purchase` AS `average_purchase`,`inventory`.`sale_method` AS `sale_method`,`inventory`.`sale_overide` AS `sale_overide`,`inventory`.`quantity` AS `quantity`,`inventory`.`category` AS `category`,`inventory`.`status` AS `status`,`inventory`.`quantity` AS `vehicle_quantity`,`inventory`.`quantity` AS `stock_quantity` from `inventory` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
