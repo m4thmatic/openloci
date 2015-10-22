@@ -27,7 +27,12 @@
 	
 		<h1>Post Accounts Receivable Entries</h1>
 		
-		{if $confirm == "post"}
+		{if $confirm == "error"}
+			<p class="portalErrorMessage">{$display_errors}</p>
+			<p><a href="index.php?-action=accounts_receivable_post"> Start Over (Post Accounts Receivable).</a></p>
+			<p><a href="index.php?-table=dashboard"> Go to Dashboard.</a></p>
+		
+		{elseif $confirm == "post"}
 			{if $display_errors == "true"}
 				<p class="portalErrorMessage">The following accounts receivable entries failed to be posted.</p>
 			{else}
@@ -150,6 +155,7 @@
 				</table>
 				<input type="submit" value="Review Selected">
 			</form>
+			
 		{else}
 			<p class="portalMessage">There are currently no accounts receivable entries ready for posting. <a href="index.php?-table=dashboard"> Return to Dashboard.</a></p>
 		{/if}
