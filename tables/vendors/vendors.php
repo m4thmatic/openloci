@@ -34,7 +34,7 @@ class tables_vendors {
 		$record =& $app->getRecord();
 		
 		//If not checked, hide tax_id field
-		if($record->val('rec_1099') != 1)
+		if(isset($record) && $record->val('rec_1099') != 1)
 			echo '<style>#tax_id_form_row{display: none}</style>';
 		
 		//Load JS to hide widget

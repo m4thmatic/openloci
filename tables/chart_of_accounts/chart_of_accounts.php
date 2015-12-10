@@ -26,9 +26,10 @@ class tables_chart_of_accounts {
 		$app =& Dataface_Application::getInstance();
 		$query =& $app->getQuery();
 		
+		//vv No longer using this.
 		//Only on the 'view' page. Otherwise, causes issues with looking at the entire table (i.e. user sees a blank page).
-		if($query['-action'] == 'view')
-			echo "<style>#record-tabs-edit{display: none;}</style";
+		//if($query['-action'] == 'view' && get_userPerms('chart_of_accounts') != "edit")
+		//	echo "<style>#record-tabs-edit{display: none;}</style";
 	}
 
 	function __field__permissions(&$record){
@@ -42,7 +43,18 @@ class tables_chart_of_accounts {
 			return array('edit'=>1);
 	}
 	
+	function account_description__permissions(&$record){
+		//Check permissions & if allowed, set edit permissions for "account_description"
+		if(get_userPerms('chart_of_accounts') == "edit")
+			return array('edit'=>1);
+	}
 
+	function account_name__permissions(&$record){
+		//Check permissions & if allowed, set edit permissions for "account_name"
+		if(get_userPerms('chart_of_accounts') == "edit")
+			return array('edit'=>1);
+	}
+	
 	//Set the record title
 	function getTitle(&$record){
 		return "Account #".$record->val('account_number')." - ".$record->val('account_name');

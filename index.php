@@ -6,6 +6,8 @@ $sort_order = parse_ini_file("conf/sort_order_defaults.ini");
 if ( isset($sort_order[@$_REQUEST['-table']]) and !isset($_REQUEST['-sort']) and @$_REQUEST['-table'] == @$_REQUEST['-table'] ){
 	$_REQUEST['-sort'] = $_GET['-sort'] = $sort_order[@$_REQUEST['-table']];
 }
+
+
 		
 //require_once "../xataface-rc2.0.3/dataface-public-api.php";
 //df_init(__FILE__, "../xataface-rc2.0.3");

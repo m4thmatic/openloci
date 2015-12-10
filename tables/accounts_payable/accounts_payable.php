@@ -49,8 +49,10 @@ class tables_accounts_payable {
 		$app =& Dataface_Application::getInstance(); 
 		$record =& $app->getRecord();
 
-		$vendor_record = df_get_record("vendors",array("vendor_id"=>$record->val("vendor_id")));
-		return $vendor_record->val("default_account");
+		if(isset($record)){
+			$vendor_record = df_get_record("vendors",array("vendor_id"=>$record->val("vendor_id")));
+			return $vendor_record->val("default_account");
+		}
 	}
 	
 	

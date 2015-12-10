@@ -81,6 +81,7 @@ class actions_journal_post {
 						switch ($coa_record->val('account_type')){
 							case "AST":
 							case "EXP":
+							case "CGS":
 								$total = $j_record->val('debit') - $j_record->val('credit');
 								break;
 							case "LIB":

@@ -452,6 +452,11 @@
 						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=list&-table=customer_markup"> Customer Markup Rates Table</a>
 					</li>
 				{/if}
+				{if $chart_of_accounts == "edit"}
+					<li><img src="{$ENV.DATAFACE_URL}/images/view.gif"/>
+						<a href="{$ENV.DATAFACE_SITE_HREF}?-action=edit&-table=_account_defaults"> Modify Default Accounts</a>
+					</li>
+				{/if}
 				</ul>
 			{/if}
 			
