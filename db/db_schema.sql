@@ -30,7 +30,7 @@ CREATE TABLE `__output_cache` (
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `_account_defaults` (
   `default_id` int(11) NOT NULL AUTO_INCREMENT,
-  `accounts_payable` int(11) DEFAULT NULL,
+  `accounts_payable` int(11) NOT NULL,
   `accounts_receivable` int(10) NOT NULL,
   `ar_account_labor` int(10) NOT NULL,
   `ar_account_materials` int(10) NOT NULL,

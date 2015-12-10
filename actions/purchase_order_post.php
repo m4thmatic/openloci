@@ -53,6 +53,7 @@ class actions_purchase_order_post {
 			$headers[$i]['date'] = $rdate['month'].'-'.$rdate['day'].'-'.$rdate['year'];
 			$headers[$i]['vendor'] = $vendorRecord->val('vendor');
 			$headers[$i]['total'] = $record->val('total');
+			$headers[$i]['link'] = "index.php?-table=" . $poTable . "&-action=browse&-recordid=" . $poTable . "%3Fpurchase_id%3D " . $record->val("purchase_id");
 
 //**************************************//
 			//If the Post button has been pressed, process the entries

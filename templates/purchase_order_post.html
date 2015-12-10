@@ -44,10 +44,10 @@
 						{else}
 							<tr class="listing even">
 						{/if}
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">{$list.id}</a></td>
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">{$list.date}</a></td>
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">{$list.vendor}</a></td>
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">{$list.total}</a></td>
+							<td valign="top"><a href="{$list.link}">{$list.id}</a></td>
+							<td valign="top"><a href="{$list.link}">{$list.date}</a></td>
+							<td valign="top"><a href="{$list.link}">{$list.vendor}</a></td>
+							<td valign="top"><a href="{$list.link}">{$list.total}</a></td>
 						</tr>
 						{assign var="i" value=$i+1}
 					{/if}
@@ -82,9 +82,9 @@
 							<tr class="listing even">
 						{/if}
 							<td><input type="checkbox" checked name="{$list.id}"></td>
-							<td valign="top" style="text-align: right;"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">{$list.id}</a></td>
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">{$list.date}</a></td>
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">{$list.vendor}</a></td>
+							<td valign="top" style="text-align: right;"><a href="{$list.link}">{$list.id}</a></td>
+							<td valign="top"><a href="{$list.link}">{$list.date}</a></td>
+							<td valign="top"><a href="{$list.link}">{$list.vendor}</a></td>
 							<td valign="top">
 								<table class="journal_post_sub_tab">
 									<tr>
@@ -110,9 +110,9 @@
 								</table>
 								<br>
 							</td>
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">${$list.tax}</a></td>
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">${$list.shipping}</a></td>
-							<td valign="top"><a href="index.php?-table={$list.table}&-action=browse&-recordid={$list.table}?purchase_id={$list.id}">${$list.total}</a></td>
+							<td valign="top"><a href="{$list.link}">${$list.tax}</a></td>
+							<td valign="top"><a href="{$list.link}">${$list.shipping}</a></td>
+							<td valign="top"><a href="{$list.link}">${$list.total}</a></td>
 						</tr>
 						{assign var="i" value=$i+1}
 					{/foreach}
