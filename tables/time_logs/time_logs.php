@@ -48,30 +48,44 @@ class tables_time_logs {
 			$this->rate_type = $value[0];
 		else
 			$this->rate_type = $value;
+		
+		if($this->rate_type == null){
+			$params['message'] = 'Rate Type Not Selected';
+			return 0;
+		}
 
 		return 1;
 	}
 		
 	function beforeSave(&$record){
+		//No Charge Rate
 		if($this->rate_type == 'no_chrg')
 			$record->setValue('rate_per_hour', 0.00);
+		//Custom Rate
 		if($this->rate_type == 'custom')
 			$record->setValue('rate_per_hour', $record->val('custom_rph'));
+		//Calculate "Rate Type" from selected "Rate"
 		elseif($this->rate_type != ''){
-			$call_rec = df_get_record('call_slips', array('call_id'=>$record->val('callslip_id')));
-			$cust_rec = df_get_record('customers', array('customer_id'=>$call_rec->val('customer_id')));
-			
-			if($cust_rec->val('rate') == null) //Should not happen.
-				return PEAR::raiseError("Rate Type not set in customer file.",DATAFACE_E_NOTICE);
-			
-			$rate_rec = df_get_record('rates', array('rate_id'=>$cust_rec->val('rate')));
-			
-			//echo 'rate: ' . $rate_rec->val('rate_id') . '<br>' . 'charge: ' . $rate_rec->val((string)$this->rate_type);
-			
-			$record->setValue('rate_id', $rate_rec->val('rate_id'));
-			$record->setValue('rate_per_hour', $rate_rec->val($this->rate_type));
+			if($record->val('rate_id') == null){
+				$call_rec = df_get_record('call_slips', array('call_id'=>$record->val('callslip_id'))); //Pull Call Slip
+				$cust_rec = df_get_record('customers', array('customer_id'=>$call_rec->val('customer_id'))); //Pull Customer from Call Slip
+				
+				if($cust_rec->val('rate') == null) //Should not happen. - Just in case, b/c this issue happened after importing some records w/o rates
+					return PEAR::raiseError("Rate Type not set in customer file.",DATAFACE_E_NOTICE);
+				
+				$rate_rec = df_get_record('rates', array('rate_id'=>$cust_rec->val('rate'))); //Get rate record cooresponding to customer default
+				
+				//echo 'rate: ' . $rate_rec->val('rate_id') . '<br>' . 'charge: ' . $rate_rec->val((string)$this->rate_type);
+				
+				$record->setValue('rate_id', $rate_rec->val('rate_id'));
+				$record->setValue('rate_per_hour', $rate_rec->val($this->rate_type));
+			}
+			else{
+				$rate_rec = df_get_record('rates', array('rate_id'=>$record->val('rate_id'))); //Get rate record cooresponding to selected rate
+				$record->setValue('rate_per_hour', $rate_rec->val($this->rate_type));
+			}
 		}
-		else
+		else //Shouldn't happen b/c the validate function should catch it. Just in case.
 			return PEAR::raiseError("Rate Type not set.",DATAFACE_E_NOTICE);
 	}
 	
