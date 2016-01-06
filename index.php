@@ -58,6 +58,7 @@ function default_location_state(){
 	$app =& Dataface_Application::getInstance();
 	$record = df_get_record('_company_info', array('id'=>1));
 	return $record->val('state');
+	//return "FL";
 }
 
 function company_name(){

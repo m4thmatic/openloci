@@ -26,7 +26,7 @@ class tables_vendors {
 	}
 	
 	function physical_state__default(){
-		return "FL";
+		return default_location_state();
 	}
 
 	function block__before_rec_1099_widget(){

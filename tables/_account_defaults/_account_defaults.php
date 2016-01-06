@@ -22,7 +22,12 @@ class tables__account_defaults {
 
 	//Remove the "view", "show all", "list", and "find" tabs - since there is only 1 record in this table.
 	function init(){
-		echo "<style>#record-tabs-view{display: none;} #actions-menu-show_all{display: none;} #table-tabs-list{display: none;} #table-tabs-find{display: none;}</style>";
+		$app =& Dataface_Application::getInstance();
+		$query =& $app->getQuery();
+
+		//Make sure table is "_account_defaults" otherwise screws up other tables that call _account_defaults.
+		if($query['-table'] == '_account_defaults')
+			echo "<style>#record-tabs-view{display: none;} #actions-menu-show_all{display: none;} #table-tabs-list{display: none;} #table-tabs-find{display: none;}</style>";
 	}
 		
 	//Redirect to Dashboard on Save

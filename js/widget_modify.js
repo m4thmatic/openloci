@@ -26,13 +26,19 @@ function widget_modify(modifier, modify, table, data_field){
 	if ( $(fields.modifier_field).val() ){
 		q[modifier] = '='+$(fields.modifier_field).val();
 	}
-			
-	$.get(DATAFACE_SITE_HREF, q, function(res){
-		if ( res ){
-			$(fields.modify_field).val(res[0][data_field]);	
-		} else {
-			alert('Warning: No data in ' + data_field + ' was found.');
-		}
-	});
+	
+	if(q[modifier] == undefined){ //If value is null
+	//	$(fields.modify_field).val("").change(); //Comment to do nothing. Uncomment to have target field set to null.
+	}
+	else{ //Else, change the appropriate field
+		$.get(DATAFACE_SITE_HREF, q, function(res){
+			if ( res ){
+				$(fields.modify_field).val(res[0][data_field]).change();
+				//alert(res[0][data_field]);
+			} else {
+				alert('Warning: No data in ' + data_field + ' was found.');
+			}
+		});
+	}
 	
 }

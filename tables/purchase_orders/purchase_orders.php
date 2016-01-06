@@ -2,61 +2,13 @@
 
 class tables_purchase_orders {
 
-
-	function __sql__(){
-	//	return "select poi.*, pos.* from foo f left join categories c on f.category_id=c.category_id";
-		return "select * from purchase_order_inventory";
-	}
-
-/*
+//SQL to create VIEW:
+//(SELECT purchase_order_id, assigned_voucher_id, vendor_id FROM `purchase_order_inventory`) union (SELECT purchase_order_id, assigned_voucher_id, vendor_id FROM `purchase_order_service`) union (SELECT purchase_order_id, assigned_voucher_id, vendor_id FROM `purchase_order_tool`) union (SELECT purchase_order_id, assigned_voucher_id, vendor_id FROM `purchase_order_vehicle`)
 
 	function getTitle(&$record){
-		return $record->strval('purchase_id');
-	}
-
-
-	function valuelist__checkbox(){
-		return array(0=>'', 1=>'Yes');
-	}
-
-	//Add attitional details to the view tab
-	function section__item_list(&$record){
-
-		$childString = "";
-
-			//Materials
-			$childString .= '<b><u>Item List</u></b><br><br>';
-			$childString .= '<table class="view_add"><tr><th>Item</th><th>Quantity</th><th>Quantity Received</th><th>List Cost</th><th>Sale Cost</th></tr>';
-
-			$purchaseorderRecords = $record->getRelatedRecords('purchase_order_list');
-			foreach ($purchaseorderRecords as $cs_pr){
-				$childString .= '<tr><td>' . $cs_pr['item_name'] .
-								'</td><td style="text-align: right">' . $cs_pr['quantity'] .
-								'</td><td style="text-align: right">' . $cs_pr['quantity_received'] .
-								'</td><td style="text-align: right">' . $cs_pr['cost_list'] .
-								'</td><td style="text-align: right">' . $cs_pr['cost_sale'] .
-								'</td></tr>';
-			}
-
-			$childString .= '</table><br>';
-
-		return array(
-			'content' => "$childString",
-			'class' => 'main',
-			//'class' => 'left',
-			'label' => 'Item List',
-			'order' => 2
-		);
+		return 'Purchase Order: ' . $record->val('purchase_order_id');
 	}
 	
-	//This is for Call Slip Invoices
-	//function field__foo($record){
-	//	$foo = 1;
-	//	return $foo;
-	//}
-	
-*/
 	
 }
-
 ?>

@@ -60,6 +60,10 @@ class tables_time_logs {
 		elseif($this->rate_type != ''){
 			$call_rec = df_get_record('call_slips', array('call_id'=>$record->val('callslip_id')));
 			$cust_rec = df_get_record('customers', array('customer_id'=>$call_rec->val('customer_id')));
+			
+			if($cust_rec->val('rate') == null) //Should not happen.
+				return PEAR::raiseError("Rate Type not set in customer file.",DATAFACE_E_NOTICE);
+			
 			$rate_rec = df_get_record('rates', array('rate_id'=>$cust_rec->val('rate')));
 			
 			//echo 'rate: ' . $rate_rec->val('rate_id') . '<br>' . 'charge: ' . $rate_rec->val((string)$this->rate_type);
